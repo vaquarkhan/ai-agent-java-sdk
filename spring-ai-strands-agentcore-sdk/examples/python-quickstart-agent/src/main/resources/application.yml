@@ -1,0 +1,13 @@
+spring:
+  application:
+    name: python-quickstart-agent-example
+
+strands:
+  agent:
+    model-provider: demo
+    model-id: python-quickstart-scripted
+    system-prompt: "You are a helpful assistant. Prefer tools for time, arithmetic, and letter counting."
+    max-iterations: 16
+
+server:
+  port: 8088

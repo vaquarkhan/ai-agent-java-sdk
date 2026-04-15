@@ -1,0 +1,15 @@
+spring:
+  application:
+    name: streaming-sse-agent-example
+
+strands:
+  agent:
+    model-provider: demo
+    model-id: streaming-sse-demo
+    system-prompt: "You stream helpful text in short fragments."
+    max-iterations: 4
+    tool-discovery:
+      enabled: false
+
+server:
+  port: 8090

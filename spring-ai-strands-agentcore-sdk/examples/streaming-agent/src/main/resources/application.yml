@@ -1,0 +1,5 @@
+strands:
+  agent:
+    model-provider: openai
+    model-id: gpt-4.1
+    max-iterations: 12

@@ -1,0 +1,22 @@
+spring:
+  application:
+    name: tool-discovery-filter-agent-example
+
+strands:
+  agent:
+    model-provider: demo
+    model-id: tool-filter-scripted
+    system-prompt: "Use only allowlisted tools."
+    max-iterations: 12
+    tool-discovery:
+      enabled: true
+      # Allow only names matching these globs...
+      include-patterns:
+        - "demo_*"
+        - "public_*"
+      # ...then deny anything matching these (wins over include)
+      exclude-patterns:
+        - "*_secret"
+
+server:
+  port: 8091

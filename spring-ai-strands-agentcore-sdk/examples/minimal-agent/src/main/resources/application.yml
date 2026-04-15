@@ -1,0 +1,5 @@
+strands:
+  agent:
+    model-provider: openai
+    model-id: gpt-4.1
+    system-prompt: "You are a concise assistant."

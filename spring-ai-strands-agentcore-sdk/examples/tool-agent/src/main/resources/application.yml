@@ -1,0 +1,7 @@
+strands:
+  agent:
+    model-provider: openai
+    model-id: gpt-4.1
+    tool-discovery:
+      include-patterns: [ "weather_*", "calc_*" ]
+      exclude-patterns: [ "weather_admin_*" ]
