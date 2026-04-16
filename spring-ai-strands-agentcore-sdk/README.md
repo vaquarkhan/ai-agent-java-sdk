@@ -179,6 +179,36 @@ strands:
 
 ---
 
+## Feature Parity with Python Strands SDK
+
+This module implements the core patterns from the [Python Strands Agents SDK](https://github.com/strands-agents/sdk-python), adapted for the Java / Spring AI ecosystem. The table below shows the current implementation status.
+
+| Python Strands SDK Feature | Java / Spring AI Equivalent | Status |
+|---|---|---|
+| Model-driven execution loop | `StrandsExecutionLoop` | Implemented |
+| Agent (model + tools + prompt) | `StrandsAgent` | Implemented |
+| Tool registration and execution | `ToolBridge`, `ToolRegistry`, `ToolCallbackProvider` | Implemented |
+| Conversation manager (sliding window) | `SlidingWindowConversationManager` | Implemented |
+| Conversation manager (token count) | `TokenCountConversationManager` | Implemented |
+| Session manager (in-memory) | `InMemorySessionManager` | Implemented |
+| Session manager (file-based) | `FileSessionManager` | Implemented |
+| Session manager (DynamoDB) | Extension point (requires AWS SDK) | Documented |
+| Hook system (before/after events) | `HookRegistry`, `StrandsHook`, `StrandsHookEvent` | Implemented |
+| Hook annotation (`@OnHook`) | `@OnHook` + `HookAnnotationProcessor` | Implemented |
+| Plugin system | `StrandsPlugin`, `PluginScanner` | Implemented |
+| Skills (reusable prompt + tool combos) | `SkillsPlugin`, `Skill` | Implemented |
+| Steering rules | `SteeringRule`, `SteeringAdvisor` | Implemented |
+| Tool loading from directory | `DirectoryToolLoader` | Implemented |
+| Dynamic MCP client | `DynamicMcpToolConnector` | Implemented |
+| Streaming (SSE) | `executeStreaming` / `Flux<String>` | Implemented |
+| Observability (traces, metrics) | `StrandsObservability`, Micrometer | Implemented |
+| Advisors (memory, RAG enrichment) | `Advisor` interface | Implemented |
+| Multi-agent (swarm, graph, workflow) | Out of scope (use spring-ai-a2a) | N/A |
+
+For a detailed side-by-side comparison, see [strands-python-vs-spring-ai.md](docs/strands-python-vs-spring-ai.md).
+
+---
+
 ## Author
 
 **Vaquar Khan**

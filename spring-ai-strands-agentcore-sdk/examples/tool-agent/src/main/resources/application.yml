@@ -1,7 +1,18 @@
+spring:
+  application:
+    name: tool-agent-example
+
 strands:
   agent:
-    model-provider: openai
-    model-id: gpt-4.1
+    model-provider: demo
+    model-id: tool-agent-scripted
+    system-prompt: "You are a helpful assistant with weather and unit conversion tools."
+    max-iterations: 10
     tool-discovery:
-      include-patterns: [ "weather_*", "calc_*" ]
-      exclude-patterns: [ "weather_admin_*" ]
+      enabled: true
+      include-patterns:
+        - "weather_*"
+        - "unit_*"
+
+server:
+  port: 8094

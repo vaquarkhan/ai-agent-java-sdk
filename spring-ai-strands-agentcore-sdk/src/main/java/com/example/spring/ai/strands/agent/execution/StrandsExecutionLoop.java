@@ -1,6 +1,9 @@
 package com.example.spring.ai.strands.agent.execution;
 
+import com.example.spring.ai.strands.agent.conversation.ConversationManager;
 import com.example.spring.ai.strands.agent.execution.stream.StreamEvent;
+import com.example.spring.ai.strands.agent.hook.HookRegistry;
+import com.example.spring.ai.strands.agent.hook.StrandsHookEvent;
 import com.example.spring.ai.strands.agent.model.ReasoningTrace;
 import com.example.spring.ai.strands.agent.model.TerminationReason;
 import com.example.spring.ai.strands.agent.model.ToolExecutionResult;
@@ -11,24 +14,61 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import reactor.core.publisher.BufferOverflowStrategy;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxSink;
 
 /**
+ * Core execution loop that drives the model-tool interaction cycle.
+ *
+ * <p>Supports hook dispatch, conversation management, parallel tool execution,
+ * and configurable retry on model errors.
+ *
  * @author Vaquar Khan
  */
-
 public class StrandsExecutionLoop {
+
+    private static final Logger log = LoggerFactory.getLogger(StrandsExecutionLoop.class);
 
     private final LoopModelClient modelClient;
     private final int maxIterations;
     private final String agentId;
+    private HookRegistry hookRegistry;
+    private ConversationManager conversationManager;
+    private boolean retryEnabled;
+    private int maxRetries;
+    private int backoffMillis;
 
     public StrandsExecutionLoop(LoopModelClient modelClient, int maxIterations, String agentId) {
         this.modelClient = modelClient;
         this.maxIterations = maxIterations;
         this.agentId = agentId;
+    }
+
+    public void setHookRegistry(HookRegistry hookRegistry) {
+        this.hookRegistry = hookRegistry;
+    }
+
+    public HookRegistry getHookRegistry() {
+        return hookRegistry;
+    }
+
+    public void setConversationManager(ConversationManager conversationManager) {
+        this.conversationManager = conversationManager;
+    }
+
+    public void setRetryEnabled(boolean retryEnabled) {
+        this.retryEnabled = retryEnabled;
+    }
+
+    public void setMaxRetries(int maxRetries) {
+        this.maxRetries = maxRetries;
+    }
+
+    public void setBackoffMillis(int backoffMillis) {
+        this.backoffMillis = backoffMillis;
     }
 
     public StrandsLoopResult run(
@@ -45,11 +85,47 @@ public class StrandsExecutionLoop {
         for (int iteration = 1; iteration <= maxIterations; iteration++) {
             Instant iterationStart = Instant.now();
             try {
-                ModelTurnResponse response = modelClient.generate(withSystemPrompt(systemPrompt, history),
-                        toolRegistry.getToolCallbacks());
+                // Apply conversation manager before building the prompt
+                List<ExecutionMessage> managed = applyConversationManager(history, context);
+                List<ExecutionMessage> prompt = withSystemPrompt(systemPrompt, managed);
+
+                // Dispatch before-model-call hook
+                dispatchHook(new StrandsHookEvent.BeforeModelCall(iteration, prompt));
+
+                ModelTurnResponse response = callModelWithRetry(prompt, toolRegistry);
+
+                // Dispatch after-model-call hook
+                dispatchHook(new StrandsHookEvent.AfterModelCall(iteration, response));
+
+                // Handle parallel tool calls
+                if (response.hasMultipleToolCalls()) {
+                    List<ToolCallRequest> requests = response.toolCallRequests();
+                    for (ToolCallRequest request : requests) {
+                        dispatchHook(new StrandsHookEvent.BeforeToolCall(iteration, request.toolName(), request.arguments()));
+                    }
+                    List<ToolExecutionResult> results = toolRegistry.executeToolsParallel(requests);
+                    for (int i = 0; i < results.size(); i++) {
+                        ToolExecutionResult toolResult = results.get(i);
+                        ToolCallRequest request = requests.get(i);
+                        dispatchHook(new StrandsHookEvent.AfterToolCall(iteration, request.toolName(), toolResult));
+                        trace = observability.recordIteration(trace, iteration, request.toolName(), request.arguments(),
+                                toolResult.output(), Duration.between(iterationStart, Instant.now()));
+                        history.add(new ExecutionMessage("tool", toolResult.output()));
+                    }
+                    continue;
+                }
+
                 if (response.hasToolCall()) {
                     ToolCallRequest request = response.toolCallRequest();
+
+                    // Dispatch before-tool-call hook
+                    dispatchHook(new StrandsHookEvent.BeforeToolCall(iteration, request.toolName(), request.arguments()));
+
                     ToolExecutionResult toolResult = toolRegistry.executeTool(request.toolName(), request.arguments());
+
+                    // Dispatch after-tool-call hook
+                    dispatchHook(new StrandsHookEvent.AfterToolCall(iteration, request.toolName(), toolResult));
+
                     String toolOutput = toolResult.output();
                     trace = observability.recordIteration(trace, iteration, request.toolName(), request.arguments(),
                             toolOutput, Duration.between(iterationStart, Instant.now()));
@@ -151,6 +227,54 @@ public class StrandsExecutionLoop {
             }
         } catch (Exception exception) {
             sink.error(new StrandsExecutionException("Streaming execution failed", exception, 0, trace));
+        }
+    }
+
+    /**
+     * Calls the model with retry logic when retry is enabled.
+     */
+    private ModelTurnResponse callModelWithRetry(List<ExecutionMessage> prompt, ToolRegistry toolRegistry) {
+        if (!retryEnabled || maxRetries <= 0) {
+            return modelClient.generate(prompt, toolRegistry.getToolCallbacks());
+        }
+        Exception lastException = null;
+        for (int attempt = 0; attempt <= maxRetries; attempt++) {
+            try {
+                return modelClient.generate(prompt, toolRegistry.getToolCallbacks());
+            } catch (Exception e) {
+                lastException = e;
+                if (attempt < maxRetries) {
+                    log.warn("Model call failed (attempt {}/{}), retrying in {}ms: {}",
+                            attempt + 1, maxRetries + 1, backoffMillis, e.getMessage());
+                    try {
+                        Thread.sleep(backoffMillis);
+                    } catch (InterruptedException ie) {
+                        Thread.currentThread().interrupt();
+                        throw new StrandsExecutionException("Retry interrupted", ie, 0, null);
+                    }
+                }
+            }
+        }
+        throw new StrandsExecutionException(
+                "Model call failed after " + (maxRetries + 1) + " attempts", lastException, 0, null);
+    }
+
+    /**
+     * Applies the conversation manager if one is configured.
+     */
+    private List<ExecutionMessage> applyConversationManager(List<ExecutionMessage> history, StrandsExecutionContext context) {
+        if (conversationManager == null) {
+            return history;
+        }
+        return conversationManager.manage(history, context);
+    }
+
+    /**
+     * Dispatches a hook event if a hook registry is configured.
+     */
+    private void dispatchHook(StrandsHookEvent event) {
+        if (hookRegistry != null) {
+            hookRegistry.dispatch(event);
         }
     }
 

@@ -7,8 +7,12 @@ import com.example.spring.ai.strands.agent.execution.ExecutionMessage;
 import com.example.spring.ai.strands.agent.execution.StrandsExecutionContext;
 import com.example.spring.ai.strands.agent.execution.StrandsExecutionLoop;
 import com.example.spring.ai.strands.agent.execution.StrandsLoopResult;
+import com.example.spring.ai.strands.agent.hook.HookRegistry;
+import com.example.spring.ai.strands.agent.hook.StrandsHookEvent;
 import com.example.spring.ai.strands.agent.model.StrandsAgentResponse;
 import com.example.spring.ai.strands.agent.observability.StrandsObservability;
+import com.example.spring.ai.strands.agent.plugin.StrandsPlugin;
+import com.example.spring.ai.strands.agent.session.SessionManager;
 import com.example.spring.ai.strands.agent.tool.ToolRegistry;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -18,11 +22,11 @@ import org.springframework.core.io.Resource;
 import reactor.core.publisher.Flux;
 
 /**
- * Model-driven agent facade: runs the execution loop with configured tools and advisors.
+ * Model-driven agent facade: runs the execution loop with configured tools, advisors,
+ * hooks, session management, and plugin support.
  *
  * @author Vaquar Khan
  */
-
 public class StrandsAgent {
 
     private final StrandsExecutionLoop executionLoop;
@@ -30,6 +34,9 @@ public class StrandsAgent {
     private final StrandsAgentProperties properties;
     private final List<Advisor> advisors;
     private final StrandsObservability observability;
+    private HookRegistry hookRegistry;
+    private SessionManager sessionManager;
+    private List<StrandsPlugin> plugins;
 
     public StrandsAgent(
             StrandsExecutionLoop executionLoop,
@@ -44,17 +51,72 @@ public class StrandsAgent {
         this.observability = observability;
     }
 
+    public void setHookRegistry(HookRegistry hookRegistry) {
+        this.hookRegistry = hookRegistry;
+    }
+
+    public HookRegistry getHookRegistry() {
+        return hookRegistry;
+    }
+
+    public void setSessionManager(SessionManager sessionManager) {
+        this.sessionManager = sessionManager;
+    }
+
+    public SessionManager getSessionManager() {
+        return sessionManager;
+    }
+
+    public void setPlugins(List<StrandsPlugin> plugins) {
+        this.plugins = plugins;
+    }
+
+    public List<StrandsPlugin> getPlugins() {
+        return plugins;
+    }
+
+    /**
+     * Initialize all registered plugins. Called after construction when plugins are set.
+     */
+    public void initPlugins() {
+        if (plugins == null || plugins.isEmpty()) {
+            return;
+        }
+        for (StrandsPlugin plugin : plugins) {
+            plugin.init(this);
+        }
+    }
+
     public StrandsAgentResponse execute(String userPrompt, StrandsExecutionContext context) {
         StrandsAgentPropertiesValidator.validateOrThrow(properties);
-        List<ExecutionMessage> messages = applyAdvisors(baseMessages(userPrompt), context);
+
+        // Dispatch before-invocation hook
+        dispatchHook(new StrandsHookEvent.BeforeInvocation(userPrompt, context));
+
+        // Load session messages if session manager is configured
+        List<ExecutionMessage> sessionMessages = loadSessionMessages(context.getSessionId());
+
+        List<ExecutionMessage> messages = new ArrayList<>(sessionMessages);
+        messages.addAll(baseMessages(userPrompt));
+        messages = applyAdvisors(messages, context);
+
         StrandsLoopResult result =
                 executionLoop.run(resolveSystemPrompt(), messages, toolRegistry, observability, context);
-        return new StrandsAgentResponse(
+
+        StrandsAgentResponse response = new StrandsAgentResponse(
                 result.content(),
                 result.reasoningTrace(),
                 result.terminationReason(),
                 result.iterationCount(),
                 result.totalDuration());
+
+        // Save session messages after execution
+        saveSessionMessages(context.getSessionId(), messages, response);
+
+        // Dispatch after-invocation hook
+        dispatchHook(new StrandsHookEvent.AfterInvocation(response));
+
+        return response;
     }
 
     public Flux<String> executeStreaming(String userPrompt, StrandsExecutionContext context) {
@@ -88,5 +150,32 @@ public class StrandsAgent {
         } catch (IOException e) {
             throw new IllegalStateException("Failed to read system prompt resource", e);
         }
+    }
+
+    private void dispatchHook(StrandsHookEvent event) {
+        if (hookRegistry != null) {
+            hookRegistry.dispatch(event);
+        }
+    }
+
+    private List<ExecutionMessage> loadSessionMessages(String sessionId) {
+        if (sessionManager == null || sessionId == null) {
+            return List.of();
+        }
+        if (sessionManager.exists(sessionId)) {
+            return sessionManager.load(sessionId);
+        }
+        return List.of();
+    }
+
+    private void saveSessionMessages(String sessionId, List<ExecutionMessage> messages, StrandsAgentResponse response) {
+        if (sessionManager == null || sessionId == null) {
+            return;
+        }
+        List<ExecutionMessage> toSave = new ArrayList<>(messages);
+        if (response.content() != null && !response.content().isBlank()) {
+            toSave.add(new ExecutionMessage("assistant", response.content()));
+        }
+        sessionManager.save(sessionId, toSave);
     }
 }

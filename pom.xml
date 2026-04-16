@@ -16,6 +16,9 @@
         <module>spring-ai-strands-agentcore-sdk/examples/calculator-minimal-agent</module>
         <module>spring-ai-strands-agentcore-sdk/examples/streaming-sse-agent</module>
         <module>spring-ai-strands-agentcore-sdk/examples/tool-discovery-filter-agent</module>
+        <module>spring-ai-strands-agentcore-sdk/examples/minimal-agent</module>
+        <module>spring-ai-strands-agentcore-sdk/examples/streaming-agent</module>
+        <module>spring-ai-strands-agentcore-sdk/examples/tool-agent</module>
     </modules>
 
     <properties>

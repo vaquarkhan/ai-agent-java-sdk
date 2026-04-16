@@ -163,6 +163,211 @@ If multiple MCP servers register overlapping tool names, resolve conflicts in MC
 
 ---
 
+## Conversation Managers
+
+Conversation managers control the context window before each model call. Two built-in implementations are provided.
+
+### SlidingWindowConversationManager
+
+Keeps only the last N messages. Simple and efficient.
+
+```java
+// Default window size: 20
+ConversationManager manager = new SlidingWindowConversationManager();
+
+// Custom window size
+ConversationManager manager = new SlidingWindowConversationManager(10);
+```
+
+Wire it into the execution loop:
+
+```java
+executionLoop.setConversationManager(new SlidingWindowConversationManager(15));
+```
+
+### TokenCountConversationManager
+
+Estimates token count per message (characters / 4 approximation) and removes oldest messages until the total fits within a configured limit.
+
+```java
+// Default max tokens: 4096
+ConversationManager manager = new TokenCountConversationManager();
+
+// Custom limit
+ConversationManager manager = new TokenCountConversationManager(2048);
+```
+
+---
+
+## Session Managers
+
+Session managers persist conversation messages across invocations for multi-turn conversations.
+
+### InMemorySessionManager
+
+`ConcurrentHashMap`-backed storage. Thread-safe. Useful for development and testing.
+
+```java
+SessionManager sessionManager = new InMemorySessionManager();
+agent.setSessionManager(sessionManager);
+```
+
+### FileSessionManager
+
+Saves sessions as JSON files in a configurable directory. Uses Jackson `ObjectMapper` for serialization and file locking for thread safety.
+
+```java
+SessionManager sessionManager = new FileSessionManager(
+    Path.of("/var/sessions"), new ObjectMapper());
+agent.setSessionManager(sessionManager);
+```
+
+File naming: `{sessionId}.json` in the configured directory.
+
+### DynamoDB Session Manager (Extension Point)
+
+A DynamoDB-backed session manager is out of scope for this module since it requires the AWS SDK dependency. To implement one, add the AWS SDK to your project and implement the `SessionManager` interface. The `save`/`load`/`delete`/`exists` contract maps directly to DynamoDB `PutItem`/`GetItem`/`DeleteItem`/`GetItem` operations.
+
+---
+
+## Steering System
+
+Steering rules conditionally inject instructions into the conversation based on keyword matching against the user prompt.
+
+### SteeringRule
+
+A record with `name`, `condition` (keyword), and `instruction` (text to prepend).
+
+### SteeringAdvisor
+
+An `Advisor` implementation that evaluates rules and prepends matching instructions as system messages. Condition matching is case-insensitive.
+
+```java
+List<SteeringRule> rules = List.of(
+    new SteeringRule("code-rule", "code", "Always include code examples."),
+    new SteeringRule("security-rule", "security", "Follow OWASP guidelines.")
+);
+SteeringAdvisor advisor = new SteeringAdvisor(rules);
+// Register as an Advisor bean or pass to StrandsAgent
+```
+
+---
+
+## Skills Plugin
+
+Skills are reusable prompt + tool combinations loaded by `SkillsPlugin`.
+
+### Skill Record
+
+```java
+Skill skill = new Skill(
+    "web-search",
+    "Web search capability",
+    "You can search the web using the web_search tool.",
+    List.of("web_search")
+);
+```
+
+### SkillsPlugin
+
+```java
+SkillsPlugin plugin = new SkillsPlugin(List.of(skill1, skill2));
+Advisor skillsAdvisor = plugin.createAdvisor();
+// The advisor prepends skill prompt fragments as system messages
+```
+
+---
+
+## Hook Annotation (@OnHook)
+
+Methods annotated with `@OnHook` are automatically discovered and registered as hooks.
+
+```java
+public class MyPlugin implements StrandsPlugin {
+    @OnHook(StrandsHookEvent.BeforeModelCall.class)
+    public void onBeforeModel(StrandsHookEvent event) {
+        // handle event
+    }
+
+    @Override
+    public void init(StrandsAgent agent) { }
+}
+```
+
+`HookAnnotationProcessor` scans a bean for `@OnHook` methods and registers them with the `HookRegistry`. Methods must accept exactly one `StrandsHookEvent` parameter; methods with incorrect signatures are skipped with a warning.
+
+---
+
+## Plugin Scanner
+
+`PluginScanner` scans a `StrandsPlugin` implementation for auto-discoverable features:
+
+- `@OnHook` annotated methods are registered as hooks
+- Methods returning `ToolCallbackProvider` are detected as tool providers
+
+```java
+PluginScanner scanner = new PluginScanner(hookRegistry);
+PluginScanner.ScanResult result = scanner.scan(myPlugin);
+// result.hooksRegistered() — number of hooks found
+// result.toolProviders() — number of tool provider methods found
+```
+
+---
+
+## Directory Tool Loader
+
+`DirectoryToolLoader` watches a directory for `.json` tool definition files and maintains a live map of shell-command-based tools.
+
+### JSON Tool Definition Format
+
+```json
+{
+    "name": "my_tool",
+    "description": "Does something useful",
+    "command": "echo hello"
+}
+```
+
+### Usage
+
+```java
+DirectoryToolLoader loader = new DirectoryToolLoader(
+    Path.of("/tools"), new ObjectMapper());
+loader.loadInitial();       // scan directory
+loader.startWatching();     // watch for changes (background thread)
+
+Map<String, ToolCallback> tools = loader.getTools();
+```
+
+When files are added, removed, or modified, the internal tool map is updated automatically via Java `WatchService`.
+
+---
+
+## Dynamic MCP Client
+
+`DynamicMcpToolConnector` provides a facade for connecting to MCP servers at runtime (not just at startup).
+
+```java
+DynamicMcpToolConnector connector = new DynamicMcpToolConnector(mcpClientFactory);
+
+// Connect via stdio
+connector.connect("mcp-db", McpConnectionConfig.stdio("python", List.of("db_server.py")));
+
+// Connect via SSE
+connector.connect("mcp-api", McpConnectionConfig.sse(
+    "http://localhost:8080", Map.of("Authorization", "Bearer token")));
+
+// List active connections
+Set<String> active = connector.listConnections();
+
+// Disconnect
+connector.disconnect("mcp-db");
+```
+
+The connector manages connection lifecycle. Actual MCP client creation is delegated to a `McpClientFactory` implementation that wraps Spring AI MCP infrastructure.
+
+---
+
 ## Testing
 
 - Replace **`LoopModelClient`** with a test double that returns scripted **`ModelTurnResponse`** instances.
