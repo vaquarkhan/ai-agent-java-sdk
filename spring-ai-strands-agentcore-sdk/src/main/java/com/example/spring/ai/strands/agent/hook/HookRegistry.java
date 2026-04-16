@@ -20,6 +20,7 @@ public class HookRegistry {
 
     private final ConcurrentHashMap<Class<? extends StrandsHookEvent>, CopyOnWriteArrayList<StrandsHook>> hooks =
             new ConcurrentHashMap<>();
+    private final CopyOnWriteArrayList<ToolCallPolicy> toolCallPolicies = new CopyOnWriteArrayList<>();
 
     /**
      * Register a hook for a specific event type.
@@ -62,5 +63,48 @@ public class HookRegistry {
     public int hookCount(Class<? extends StrandsHookEvent> eventType) {
         List<StrandsHook> registered = hooks.get(eventType);
         return registered == null ? 0 : registered.size();
+    }
+
+    /**
+     * Register a tool-call policy that can approve/deny/modify arguments before execution.
+     *
+     * @param policy policy to apply for each requested tool call
+     */
+    public void registerToolCallPolicy(ToolCallPolicy policy) {
+        if (policy != null) {
+            toolCallPolicies.add(policy);
+        }
+    }
+
+    /**
+     * Applies all registered tool-call policies in registration order.
+     *
+     * <p>If any policy denies execution, evaluation stops and the call is denied.
+     * If policies rewrite arguments, the latest rewritten value is used.
+     *
+     * @param iteration loop iteration
+     * @param toolName tool name
+     * @param arguments current tool arguments
+     * @return final decision after applying policies
+     */
+    public ToolCallPolicyDecision evaluateToolCall(int iteration, String toolName, String arguments) {
+        String currentArguments = arguments;
+        for (ToolCallPolicy policy : toolCallPolicies) {
+            try {
+                ToolCallPolicyDecision decision = policy.evaluate(iteration, toolName, currentArguments);
+                if (decision == null) {
+                    continue;
+                }
+                if (!decision.allowed()) {
+                    return ToolCallPolicyDecision.deny(decision.denialOutput());
+                }
+                if (decision.arguments() != null) {
+                    currentArguments = decision.arguments();
+                }
+            } catch (Exception e) {
+                log.warn("Tool call policy threw exception for tool {}: {}", toolName, e.getMessage(), e);
+            }
+        }
+        return ToolCallPolicyDecision.allow(currentArguments);
     }
 }

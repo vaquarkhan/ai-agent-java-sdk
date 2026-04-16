@@ -4,6 +4,7 @@ import com.example.spring.ai.strands.agent.conversation.ConversationManager;
 import com.example.spring.ai.strands.agent.execution.stream.StreamEvent;
 import com.example.spring.ai.strands.agent.hook.HookRegistry;
 import com.example.spring.ai.strands.agent.hook.StrandsHookEvent;
+import com.example.spring.ai.strands.agent.hook.ToolCallPolicyDecision;
 import com.example.spring.ai.strands.agent.model.ReasoningTrace;
 import com.example.spring.ai.strands.agent.model.TerminationReason;
 import com.example.spring.ai.strands.agent.model.ToolExecutionResult;
@@ -100,13 +101,30 @@ public class StrandsExecutionLoop {
                 // Handle parallel tool calls
                 if (response.hasMultipleToolCalls()) {
                     List<ToolCallRequest> requests = response.toolCallRequests();
+                    List<ToolCallRequest> allowedRequests = new ArrayList<>();
                     for (ToolCallRequest request : requests) {
-                        dispatchHook(new StrandsHookEvent.BeforeToolCall(iteration, request.toolName(), request.arguments()));
+                        ToolCallEvaluation eval = evaluateToolCall(iteration, request);
+                        if (!eval.allowed()) {
+                            ToolExecutionResult deniedResult = new ToolExecutionResult(
+                                    request.toolName(), false, eval.denialOutput(), Duration.ZERO);
+                            dispatchHook(new StrandsHookEvent.AfterToolCall(iteration, request.toolName(), deniedResult));
+                            trace = observability.recordIteration(trace, iteration, request.toolName(), request.arguments(),
+                                    eval.denialOutput(), Duration.between(iterationStart, Instant.now()));
+                            history.add(new ExecutionMessage("tool", eval.denialOutput()));
+                            continue;
+                        }
+                        ToolCallRequest controlled = eval.request();
+                        dispatchHook(new StrandsHookEvent.BeforeToolCall(
+                                iteration, controlled.toolName(), controlled.arguments()));
+                        allowedRequests.add(controlled);
                     }
-                    List<ToolExecutionResult> results = toolRegistry.executeToolsParallel(requests);
+                    if (allowedRequests.isEmpty()) {
+                        continue;
+                    }
+                    List<ToolExecutionResult> results = toolRegistry.executeToolsParallel(allowedRequests);
                     for (int i = 0; i < results.size(); i++) {
                         ToolExecutionResult toolResult = results.get(i);
-                        ToolCallRequest request = requests.get(i);
+                        ToolCallRequest request = allowedRequests.get(i);
                         dispatchHook(new StrandsHookEvent.AfterToolCall(iteration, request.toolName(), toolResult));
                         trace = observability.recordIteration(trace, iteration, request.toolName(), request.arguments(),
                                 toolResult.output(), Duration.between(iterationStart, Instant.now()));
@@ -117,6 +135,17 @@ public class StrandsExecutionLoop {
 
                 if (response.hasToolCall()) {
                     ToolCallRequest request = response.toolCallRequest();
+                    ToolCallEvaluation eval = evaluateToolCall(iteration, request);
+                    if (!eval.allowed()) {
+                        ToolExecutionResult deniedResult = new ToolExecutionResult(
+                                request.toolName(), false, eval.denialOutput(), Duration.ZERO);
+                        dispatchHook(new StrandsHookEvent.AfterToolCall(iteration, request.toolName(), deniedResult));
+                        trace = observability.recordIteration(trace, iteration, request.toolName(), request.arguments(),
+                                eval.denialOutput(), Duration.between(iterationStart, Instant.now()));
+                        history.add(new ExecutionMessage("tool", eval.denialOutput()));
+                        continue;
+                    }
+                    request = eval.request();
 
                     // Dispatch before-tool-call hook
                     dispatchHook(new StrandsHookEvent.BeforeToolCall(iteration, request.toolName(), request.arguments()));
@@ -191,12 +220,21 @@ public class StrandsExecutionLoop {
                         sink.next(token.value());
                     } else if (event instanceof StreamEvent.ToolCallBoundary boundary) {
                         hadToolCall = true;
-                        ToolExecutionResult toolResult = toolRegistry.executeTool(
-                                boundary.request().toolName(), boundary.request().arguments());
-                        trace = observability.recordIteration(trace, iteration, boundary.request().toolName(),
-                                boundary.request().arguments(), toolResult.output(),
-                                Duration.between(iterationStart, Instant.now()));
-                        history.add(new ExecutionMessage("tool", toolResult.output()));
+                        ToolCallRequest request = boundary.request();
+                        ToolCallEvaluation eval = evaluateToolCall(iteration, request);
+                        if (!eval.allowed()) {
+                            trace = observability.recordIteration(trace, iteration, request.toolName(),
+                                    request.arguments(), eval.denialOutput(), Duration.between(iterationStart, Instant.now()));
+                            history.add(new ExecutionMessage("tool", eval.denialOutput()));
+                        } else {
+                            ToolCallRequest controlled = eval.request();
+                            ToolExecutionResult toolResult = toolRegistry.executeTool(
+                                    controlled.toolName(), controlled.arguments());
+                            trace = observability.recordIteration(trace, iteration, controlled.toolName(),
+                                    controlled.arguments(), toolResult.output(),
+                                    Duration.between(iterationStart, Instant.now()));
+                            history.add(new ExecutionMessage("tool", toolResult.output()));
+                        }
                     } else if (event instanceof StreamEvent.Complete complete) {
                         if (!complete.finalText().isBlank()) {
                             history.add(new ExecutionMessage("assistant", complete.finalText()));
@@ -275,6 +313,27 @@ public class StrandsExecutionLoop {
     private void dispatchHook(StrandsHookEvent event) {
         if (hookRegistry != null) {
             hookRegistry.dispatch(event);
+        }
+    }
+
+    private ToolCallEvaluation evaluateToolCall(int iteration, ToolCallRequest request) {
+        if (hookRegistry == null) {
+            return ToolCallEvaluation.allowed(request);
+        }
+        ToolCallPolicyDecision decision = hookRegistry.evaluateToolCall(iteration, request.toolName(), request.arguments());
+        if (!decision.allowed()) {
+            return ToolCallEvaluation.denied(decision.denialOutput());
+        }
+        return ToolCallEvaluation.allowed(new ToolCallRequest(request.toolName(), decision.arguments()));
+    }
+
+    private record ToolCallEvaluation(ToolCallRequest request, boolean allowed, String denialOutput) {
+        static ToolCallEvaluation allowed(ToolCallRequest request) {
+            return new ToolCallEvaluation(request, true, null);
+        }
+
+        static ToolCallEvaluation denied(String denialOutput) {
+            return new ToolCallEvaluation(null, false, denialOutput);
         }
     }
 

@@ -179,33 +179,20 @@ strands:
 
 ---
 
-## Feature Parity with Python Strands SDK
+## Same as Python Strands SDK (through composition)
 
-This module implements the core patterns from the [Python Strands Agents SDK](https://github.com/strands-agents/sdk-python), adapted for the Java / Spring AI ecosystem. The table below shows the current implementation status.
+The Python Strands SDK is **much more than just the execution loop**. The Java/Spring AI approach intentionally splits the “Strands experience” across multiple packages:
 
-| Python Strands SDK Feature | Java / Spring AI Equivalent | Status |
-|---|---|---|
-| Model-driven execution loop | `StrandsExecutionLoop` | Implemented |
-| Agent (model + tools + prompt) | `StrandsAgent` | Implemented |
-| Tool registration and execution | `ToolBridge`, `ToolRegistry`, `ToolCallbackProvider` | Implemented |
-| Conversation manager (sliding window) | `SlidingWindowConversationManager` | Implemented |
-| Conversation manager (token count) | `TokenCountConversationManager` | Implemented |
-| Session manager (in-memory) | `InMemorySessionManager` | Implemented |
-| Session manager (file-based) | `FileSessionManager` | Implemented |
-| Session manager (DynamoDB) | Extension point (requires AWS SDK) | Documented |
-| Hook system (before/after events) | `HookRegistry`, `StrandsHook`, `StrandsHookEvent` | Implemented |
-| Hook annotation (`@OnHook`) | `@OnHook` + `HookAnnotationProcessor` | Implemented |
-| Plugin system | `StrandsPlugin`, `PluginScanner` | Implemented |
-| Skills (reusable prompt + tool combos) | `SkillsPlugin`, `Skill` | Implemented |
-| Steering rules | `SteeringRule`, `SteeringAdvisor` | Implemented |
-| Tool loading from directory | `DirectoryToolLoader` | Implemented |
-| Dynamic MCP client | `DynamicMcpToolConnector` | Implemented |
-| Streaming (SSE) | `executeStreaming` / `Flux<String>` | Implemented |
-| Observability (traces, metrics) | `StrandsObservability`, Micrometer | Implemented |
-| Advisors (memory, RAG enrichment) | `Advisor` interface | Implemented |
-| Multi-agent (swarm, graph, workflow) | Out of scope (use spring-ai-a2a) | N/A |
+- **Model providers:** Python ships **13+ providers** built-in. Java does not ship providers inside this module; it delegates to Spring AI model starters. That is why this project includes a bridge so the loop can work with Spring AI models (for example via `ChatModelLoopModelClient` and Spring AI’s `ChatModel` beans), but you still need Spring AI starters on the classpath.
+- **Execution control:** Python supports loop control patterns (for example pause/interrupt for human approval) and steering through hook/controller-style APIs. In this Java module, hooks can **observe** and we also added **tool-call policies** (allow/deny/rewrite) so you can block or steer tool execution mid-loop. What’s still missing is the full Python-style `event.interrupt()` style “pause and wait for approval, then resume” contract.
+- **Multi-agent orchestration:** Python Graph/Swarm/A2A orchestration is built into the SDK. This Java module focuses on single-agent execution; for Graph/Swarm/A2A style coordination you use Spring AI’s companion packages (for example `spring-ai-a2a`) and/or your own orchestration around `StrandsAgent`.
+- **Tool ecosystem:** Python’s `strands-agents-tools` gives many ready-to-use tools (calculator, HTTP request, shell, file ops, etc.). Java does not include an equivalent pre-built tool bundle in this module. Instead, you provide tools through Spring AI/AgentCore as `ToolCallbackProvider` beans (and MCP tools also surface as those providers), and this SDK discovers them via `ToolBridge` / `ToolRegistry`.
+- **Streaming and other SDK layers:** This module provides **streaming** via `StrandsAgent.executeStreaming` (`Flux<String>`). However, Python features like bidirectional streaming, evaluation SDK, structured output generation, and summarization-based conversation managers are not implemented in this Java module (for conversation we currently rely on window/token-count style managers rather than an LLM-based summarization pipeline).
 
-For a detailed side-by-side comparison, see [strands-python-vs-spring-ai.md](docs/strands-python-vs-spring-ai.md).
+**Practical meaning:** this repository delivers the **Strands-style agent loop engine** for Java, while the “batteries included” experience (models, MCP runtime, multi-agent coordination, and many tools) comes from the broader Spring AI ecosystem you compose in.
+
+
+For the detailed side-by-side comparison, see [strands-python-vs-spring-ai.md](docs/strands-python-vs-spring-ai.md).
 
 ---
 
