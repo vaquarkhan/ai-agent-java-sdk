@@ -12,6 +12,7 @@
 
     <modules>
         <module>spring-ai-strands-agentcore-sdk</module>
+        <module>spring-ai-strands-agentcore-sdk/extensions/dynamodb-session-manager</module>
         <module>spring-ai-strands-agentcore-sdk/examples/quickstart-agent</module>
         <module>spring-ai-strands-agentcore-sdk/examples/calculator-minimal-agent</module>
         <module>spring-ai-strands-agentcore-sdk/examples/streaming-sse-agent</module>
