@@ -169,7 +169,7 @@ strands:
 
 ## Further reading
 
-- [Examples (Python quickstart port)](examples/README.md)
+- [Examples (quickstart and more)](examples/README.md)
 - [Strands Python vs Spring AI (side-by-side)](docs/strands-python-vs-spring-ai.md)
 - [Tutorial (step-by-step)](docs/tutorial.md) - tools, MCP, streaming, production tuning
 - [Developer guide (reference)](docs/developer-guide.md) - architecture, configuration matrix, observability

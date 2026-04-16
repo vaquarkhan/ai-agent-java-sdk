@@ -2330,7 +2330,7 @@ System.out.println("Iterations: " + trace.iterations().size());
 
 ## Next Steps
 
-- Run the examples under [examples/README.md](../examples/README.md): **python-quickstart-agent**, **calculator-minimal-agent**, **streaming-sse-agent**, **tool-discovery-filter-agent**
+- Run the examples under [examples/README.md](../examples/README.md): **quickstart-agent**, **calculator-minimal-agent**, **streaming-sse-agent**, **tool-discovery-filter-agent**
 - Read [developer-guide.md](developer-guide.md) for the full configuration matrix and observability reference
 - Implement a real `LoopModelClient` for your Spring AI chat model (Bedrock, OpenAI, Ollama, etc.)
 - Set up Micrometer dashboards to monitor `strands.iteration.count`, `strands.loop.duration`, and `strands.tool.invocations`

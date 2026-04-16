@@ -1,4 +1,4 @@
-package com.example.spring.ai.strands.examples.pythonquickstart;
+package com.example.spring.ai.strands.examples.quickstart;
 
 import com.example.spring.ai.strands.agent.execution.ExecutionMessage;
 import com.example.spring.ai.strands.agent.execution.LoopModelClient;
@@ -17,14 +17,14 @@ import reactor.core.publisher.Flux;
 /**
  * Wires tools and a {@link LoopModelClient} for the quickstart demo.
  *
- * <p>The scripted model replays a tool sequence equivalent to what the Python quickstart expects,
- * so the example runs without cloud API keys. Replace this bean with a {@link LoopModelClient}
- * backed by Spring AI {@code ChatClient} when you want a real foundation model.
+ * <p>The scripted model replays a tool sequence so the example runs without cloud API keys.
+ * Replace this bean with a {@link LoopModelClient} backed by Spring AI {@code ChatClient}
+ * when you want a real foundation model.
  *
  * @author Vaquar Khan
  */
 @Configuration
-public class PythonQuickstartConfiguration {
+public class QuickstartConfiguration {
 
     @Bean
     public ToolCallbackProvider quickstartToolCallbackProvider() {
@@ -36,12 +36,12 @@ public class PythonQuickstartConfiguration {
     }
 
     /**
-     * Drives the same three tool calls as a typical successful Strands Python run on the default
+     * Drives the same three tool calls as a typical successful run on the default
      * prompt, then returns a short final summary (no LLM).
      */
     @Bean
     @Primary
-    public LoopModelClient pythonQuickstartScriptedModelClient() {
+    public LoopModelClient quickstartScriptedModelClient() {
         return new LoopModelClient() {
 
             @Override

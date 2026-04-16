@@ -1,4 +1,4 @@
-package com.example.spring.ai.strands.examples.pythonquickstart;
+package com.example.spring.ai.strands.examples.quickstart;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -10,7 +10,7 @@ import org.springframework.ai.tool.definition.ToolDefinition;
 
 /**
  * Tools analogous to {@code strands_tools} {@code calculator} and {@code current_time}, plus a
- * custom {@code letter_counter} matching the Python {@code @tool} quickstart.
+ * custom {@code letter_counter} matching the quickstart pattern.
  *
  * @author Vaquar Khan
  */

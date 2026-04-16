@@ -1,4 +1,4 @@
-package com.example.spring.ai.strands.examples.pythonquickstart;
+package com.example.spring.ai.strands.examples.quickstart;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -12,7 +12,7 @@ import org.springframework.boot.test.web.server.LocalServerPort;
  * @author Vaquar Khan
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-class PythonQuickstartApplicationTests {
+class QuickstartApplicationTests {
 
     @LocalServerPort
     private int port;
@@ -23,7 +23,7 @@ class PythonQuickstartApplicationTests {
     @Test
     void quickstartEndpointReturnsJson() {
         var body = restTemplate.getForObject(
-                "http://localhost:" + port + "/api/quickstart", PythonQuickstartController.QuickstartHttpResponse.class);
+                "http://localhost:" + port + "/api/quickstart", QuickstartController.QuickstartHttpResponse.class);
         assertThat(body).isNotNull();
         assertThat(body.content()).isNotBlank();
         assertThat(body.iterationCount()).isPositive();

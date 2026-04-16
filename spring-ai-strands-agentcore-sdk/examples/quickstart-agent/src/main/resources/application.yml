@@ -1,11 +1,11 @@
 spring:
   application:
-    name: python-quickstart-agent-example
+    name: quickstart-agent-example
 
 strands:
   agent:
     model-provider: demo
-    model-id: python-quickstart-scripted
+    model-id: quickstart-scripted
     system-prompt: "You are a helpful assistant. Prefer tools for time, arithmetic, and letter counting."
     max-iterations: 16
 

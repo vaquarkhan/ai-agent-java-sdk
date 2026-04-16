@@ -1,22 +1,22 @@
-# Python quickstart (ported to Java / Spring AI)
+# Quickstart Agent (Java / Spring AI)
 
-This example mirrors the official **Strands Python quickstart**: an agent with **community-style tools** (`calculator`, `current_time`) and a custom **`letter_counter`**, then a multi-part user message.
+This example demonstrates a multi-tool agent with **community-style tools** (`calculator`, `current_time`) and a custom **`letter_counter`**, then a multi-part user message.
 
-- Python reference: [Python Quickstart | Strands Agents SDK](https://strandsagents.com/docs/user-guide/quickstart/python/)
-- Source sketch (conceptually): `pip install strands-agents strands-agents-tools`, then `Agent(tools=[calculator, current_time, letter_counter])` and the long user prompt with four requests.
+- Reference: [Strands Agents SDK Quickstart](https://strandsagents.com/docs/user-guide/quickstart/python/)
+- Conceptual sketch: `Agent(tools=[calculator, current_time, letter_counter])` and a long user prompt with four requests.
 
 ## What this Java project does
 
-| Python (Strands) | This example |
+| Strands (Python) | This example |
 |------------------|--------------|
 | `from strands import Agent, tool` | `StrandsAgent` + `StrandsExecutionLoop` (from **spring-ai-strands-agentcore-sdk**) |
 | `from strands_tools import calculator, current_time` | `QuickstartToolCallbacks.calculator()` and `.currentTime()` (same roles, Java implementations) |
 | `@tool def letter_counter(...)` | `QuickstartToolCallbacks.letterCounter()` |
-| `agent(message)` | `GET /api/quickstart` → `strandsAgent.execute(...)` |
+| `agent(message)` | `GET /api/quickstart` -> `strandsAgent.execute(...)` |
 
 ### Scripted model (no API keys)
 
-By default, **`PythonQuickstartConfiguration`** registers a **`@Primary` `LoopModelClient`** that **scripts** the three tool calls in order, then returns a short final line. That lets you run the app **without** Amazon Bedrock or OpenAI credentials while still exercising **real tool execution** through `ToolRegistry`.
+By default, **`QuickstartConfiguration`** registers a **`@Primary` `LoopModelClient`** that **scripts** the three tool calls in order, then returns a short final line. That lets you run the app **without** Amazon Bedrock or OpenAI credentials while still exercising **real tool execution** through `ToolRegistry`.
 
 For a **real** foundation model, replace that bean with a `LoopModelClient` implementation that delegates to Spring AI **`ChatClient`** (or your provider) and maps responses to `ModelTurnResponse` / `StreamEvent`s.
 
@@ -25,7 +25,7 @@ For a **real** foundation model, replace that bean with a `LoopModelClient` impl
 From the repository root (after installing the SDK module locally if needed):
 
 ```bash
-cd spring-ai-strands-agentcore-sdk/examples/python-quickstart-agent
+cd spring-ai-strands-agentcore-sdk/examples/quickstart-agent
 mvn spring-boot:run
 ```
 
