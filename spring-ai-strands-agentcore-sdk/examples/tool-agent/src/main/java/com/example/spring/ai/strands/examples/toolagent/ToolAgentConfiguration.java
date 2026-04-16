@@ -50,7 +50,7 @@ public class ToolAgentConfiguration {
                             "{\"value\":22,\"from\":\"celsius\",\"to\":\"fahrenheit\"}");
                     default -> ModelTurnResponse.finalAnswer(
                             "Seattle is currently 22C (71.6F), partly cloudy with 65% humidity. "
-                                    + "(Scripted demo — swap in a real LoopModelClient for LLM-driven behavior.)");
+                                    + "(Scripted demo - swap in a real LoopModelClient for LLM-driven behavior.)");
                 };
             }
 

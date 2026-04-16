@@ -21,8 +21,8 @@ The table below is a **side-by-side** map from the Python (and TS) mental model 
 | **Streaming** | Async generators / Python streaming patterns | `executeStreaming` → `reactor.core.publisher.Flux<String>` |
 | **Configuration** | Code + environment variables | `application.yml` / `application.properties` under `strands.agent.*` |
 | **Observability** | Strands traces / OpenTelemetry in Python examples | `StrandsObservability`, Micrometer metrics, optional observations |
-| **Multi-agent / A2A / graphs** | Strands samples and ecosystem (Python/TS) | Not in this JAR — use **spring-ai-a2a**, orchestration, or custom workflows that call **`StrandsAgent`** (see below) |
-| **Agent HTTP/runtime, browser/code tools** | Strands + host app in Python | Not reimplemented here — use **spring-ai-agentcore** and related starters; tools surface as **`ToolCallbackProvider`** beans this SDK discovers (see below) |
+| **Multi-agent / A2A / graphs** | Strands samples and ecosystem (Python/TS) | Not in this JAR - use **spring-ai-a2a**, orchestration, or custom workflows that call **`StrandsAgent`** (see below) |
+| **Agent HTTP/runtime, browser/code tools** | Strands + host app in Python | Not reimplemented here - use **spring-ai-agentcore** and related starters; tools surface as **`ToolCallbackProvider`** beans this SDK discovers (see below) |
 
 ## Composition: AgentCore and the rest of Spring AI (not duplicated in this JAR)
 
@@ -39,8 +39,8 @@ In short: **Python Strands** = core loop + a large ecosystem; **this SDK** = the
 
 ## Related reading
 
-- Module [README.md](../README.md) — overview, Maven, and configuration
-- [Tutorial](tutorial.md) — step-by-step usage
-- [Developer guide](developer-guide.md) — architecture and property reference
-- [Strands Agents SDK](https://strandsagents.com/) — Python / TypeScript reference
+- Module [README.md](../README.md) - overview, Maven, and configuration
+- [Tutorial](tutorial.md) - step-by-step usage
+- [Developer guide](developer-guide.md) - architecture and property reference
+- [Strands Agents SDK](https://strandsagents.com/) - Python / TypeScript reference
 - [Spring AI documentation](https://docs.spring.io/spring-ai/reference/)

@@ -11,7 +11,7 @@ The [Strands Agents SDK](https://strandsagents.com/) (Python and TypeScript, ope
 - You supply a **model**, a **system prompt**, and **tools**.
 - The model **reasons** about the task, may **call tools**, receives **tool results**, and **repeats** until it returns a **final answer** (or a guardrail such as max iterations stops the loop).
 
-That differs from frameworks where you encode fixed step sequences or state machines for every branch. In a model-driven design, the model adapts when inputs change, tools fail, or users ask unexpected questions—within the boundaries you set (prompt, tool set, limits, security).
+That differs from frameworks where you encode fixed step sequences or state machines for every branch. In a model-driven design, the model adapts when inputs change, tools fail, or users ask unexpected questions-within the boundaries you set (prompt, tool set, limits, security).
 
 Public background on that philosophy and production use cases:
 
@@ -35,8 +35,8 @@ The official Strands SDKs today target **Python** and **TypeScript**. Many enter
 This module exists to:
 
 1. **Implement the Strands-style execution loop** in Java: model call → optional tool execution → feed results back → repeat until completion or limits.
-2. **Reuse Spring AI** primitives: `ChatClient`, `ToolCallback`, `ToolCallbackProvider`, advisors, and optional MCP-related providers—rather than inventing a second tool stack.
-3. **Compose with spring-ai-agentcore**: runtime invocation (`@AgentCoreInvocation`), memory advisors, browser and code-interpreter tools as `ToolCallbackProvider` beans, SSE streaming, and session context—without duplicating what those modules already do.
+2. **Reuse Spring AI** primitives: `ChatClient`, `ToolCallback`, `ToolCallbackProvider`, advisors, and optional MCP-related providers-rather than inventing a second tool stack.
+3. **Compose with spring-ai-agentcore**: runtime invocation (`@AgentCoreInvocation`), memory advisors, browser and code-interpreter tools as `ToolCallbackProvider` beans, SSE streaming, and session context-without duplicating what those modules already do.
 
 So: **Strands semantics on the loop**; **Spring AI and AgentCore for wiring, tools, memory, and HTTP**.
 
@@ -67,13 +67,13 @@ Same **model-driven loop** idea; different **language runtime** and **integratio
 
 ## What stays in other libraries (not duplicated here)
 
-To avoid overlap with existing **Spring AI** modules, this JAR **does not** reimplement the full agent platform—only the **Strands-style tool loop**.
+To avoid overlap with existing **Spring AI** modules, this JAR **does not** reimplement the full agent platform-only the **Strands-style tool loop**.
 
-- **spring-ai-agentcore** — Agent HTTP/runtime, `@AgentCoreInvocation`, health, rate limiting, artifact store, authentication model, BOM alignment, and **tooling such as browser or code-interpreter** when exposed as **`ToolCallbackProvider`** beans from AgentCore starters. This SDK **consumes** those tools via `ToolBridge`; it does **not** embed AgentCore or duplicate its endpoints.
-- **spring-ai-a2a** — Agent-to-Agent protocol and **multi-agent** patterns (swarm-, graph-, or workflow-style coordination). Use A2A, orchestration, or custom workflows that call **`StrandsAgent`** as a building block; those patterns are **out of scope** for this module alone.
-- **spring-ai-mcp** — MCP client/server; remote tools still surface through Spring AI **`ToolCallbackProvider`** where configured.
+- **spring-ai-agentcore** - Agent HTTP/runtime, `@AgentCoreInvocation`, health, rate limiting, artifact store, authentication model, BOM alignment, and **tooling such as browser or code-interpreter** when exposed as **`ToolCallbackProvider`** beans from AgentCore starters. This SDK **consumes** those tools via `ToolBridge`; it does **not** embed AgentCore or duplicate its endpoints.
+- **spring-ai-a2a** - Agent-to-Agent protocol and **multi-agent** patterns (swarm-, graph-, or workflow-style coordination). Use A2A, orchestration, or custom workflows that call **`StrandsAgent`** as a building block; those patterns are **out of scope** for this module alone.
+- **spring-ai-mcp** - MCP client/server; remote tools still surface through Spring AI **`ToolCallbackProvider`** where configured.
 
-You combine **this module** with AgentCore, A2A, MCP, and your application code when you need the full picture—similar to how **Python Strands** composes its core loop with a larger ecosystem.
+You combine **this module** with AgentCore, A2A, MCP, and your application code when you need the full picture-similar to how **Python Strands** composes its core loop with a larger ecosystem.
 
 ---
 
@@ -88,7 +88,7 @@ You combine **this module** with AgentCore, A2A, MCP, and your application code 
 | Traces and metrics for the loop | `StrandsObservability`, Micrometer, optional observations |
 | Streaming UX | `executeStreaming` → `Flux<String>` for integration with SSE-style runtimes |
 
-Advanced multi-agent patterns (swarm, graph, workflow) from Strands Python docs are **not implemented inside this JAR**. On the Spring AI stack they belong in **spring-ai-a2a**, application orchestration, or workflows that invoke **`StrandsAgent`**. AgentCore HTTP/runtime and browser/code-style tools come from **spring-ai-agentcore** (and starters) as **`ToolCallbackProvider`** beans—see [strands-python-vs-spring-ai.md](docs/strands-python-vs-spring-ai.md#composition-agentcore-and-the-rest-of-spring-ai-not-duplicated-in-this-jar).
+Advanced multi-agent patterns (swarm, graph, workflow) from Strands Python docs are **not implemented inside this JAR**. On the Spring AI stack they belong in **spring-ai-a2a**, application orchestration, or workflows that invoke **`StrandsAgent`**. AgentCore HTTP/runtime and browser/code-style tools come from **spring-ai-agentcore** (and starters) as **`ToolCallbackProvider`** beans-see [strands-python-vs-spring-ai.md](docs/strands-python-vs-spring-ai.md#composition-agentcore-and-the-rest-of-spring-ai-not-duplicated-in-this-jar).
 
 ---
 
@@ -96,7 +96,7 @@ Advanced multi-agent patterns (swarm, graph, workflow) from Strands Python docs 
 
 - **Java 17+**
 - **Spring Boot 3.x** (as used by spring-ai-agentcore)
-- **Spring AI** (via BOM; this repo’s parent imports `spring-ai-bom`, e.g. `1.0.0-M6`—adjust to a GA version when you align with your stack)
+- **Spring AI** (via BOM; this repo’s parent imports `spring-ai-bom`, e.g. `1.0.0-M6`-adjust to a GA version when you align with your stack)
 
 ---
 
@@ -149,12 +149,12 @@ strands:
 
 ## Primary Java types
 
-- `com.example.spring.ai.strands.agent.StrandsAgent` – entry point
-- `com.example.spring.ai.strands.agent.config.StrandsAgentProperties` – `strands.agent.*` binding
-- `com.example.spring.ai.strands.agent.execution.StrandsExecutionLoop` – core loop
-- `com.example.spring.ai.strands.agent.tool.ToolBridge` / `ToolRegistry` – tool discovery and execution
-- `com.example.spring.ai.strands.agent.observability.StrandsObservability` – traces and metrics
-- `com.example.spring.ai.strands.agent.api.Advisor` – optional prompt enrichment (e.g. memory advisors from AgentCore)
+- `com.example.spring.ai.strands.agent.StrandsAgent` - entry point
+- `com.example.spring.ai.strands.agent.config.StrandsAgentProperties` - `strands.agent.*` binding
+- `com.example.spring.ai.strands.agent.execution.StrandsExecutionLoop` - core loop
+- `com.example.spring.ai.strands.agent.tool.ToolBridge` / `ToolRegistry` - tool discovery and execution
+- `com.example.spring.ai.strands.agent.observability.StrandsObservability` - traces and metrics
+- `com.example.spring.ai.strands.agent.api.Advisor` - optional prompt enrichment (e.g. memory advisors from AgentCore)
 
 ---
 
@@ -171,8 +171,8 @@ strands:
 
 - [Examples (Python quickstart port)](examples/README.md)
 - [Strands Python vs Spring AI (side-by-side)](docs/strands-python-vs-spring-ai.md)
-- [Tutorial (step-by-step)](docs/tutorial.md) — tools, MCP, streaming, production tuning
-- [Developer guide (reference)](docs/developer-guide.md) — architecture, configuration matrix, observability
+- [Tutorial (step-by-step)](docs/tutorial.md) - tools, MCP, streaming, production tuning
+- [Developer guide (reference)](docs/developer-guide.md) - architecture, configuration matrix, observability
 - [Spring AI documentation](https://docs.spring.io/spring-ai/reference/)
 - [spring-ai-agentcore](https://github.com/spring-ai-community/spring-ai-agentcore)
 - [Strands Agents SDK](https://strandsagents.com/) (Python / TypeScript reference for the original pattern and tooling ecosystem)

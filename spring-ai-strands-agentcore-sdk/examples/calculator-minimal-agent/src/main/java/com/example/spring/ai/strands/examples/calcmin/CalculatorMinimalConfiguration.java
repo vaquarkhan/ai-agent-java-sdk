@@ -84,7 +84,7 @@ public class CalculatorMinimalConfiguration {
                     return ModelTurnResponse.toolCall("calculator", args.toString());
                 }
                 return ModelTurnResponse.finalAnswer(
-                        "The square root of 1764 is 42 (isqrt verified). Scripted demo — use a real LLM for open-ended math.");
+                        "The square root of 1764 is 42 (isqrt verified). Scripted demo - use a real LLM for open-ended math.");
             }
 
             @Override

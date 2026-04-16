@@ -13,7 +13,7 @@ import reactor.core.publisher.Flux;
 
 /**
  * Scripted {@link LoopModelClient} that echoes the user message back as a final answer.
- * No tools, no multi-turn reasoning — the simplest possible agent loop.
+ * No tools, no multi-turn reasoning - the simplest possible agent loop.
  *
  * Swap this bean with a ChatClient-backed implementation for real LLM behavior.
  *
@@ -36,7 +36,7 @@ public class MinimalAgentConfiguration {
                         .orElse("No question provided.");
                 return ModelTurnResponse.finalAnswer(
                         "You asked: \"" + userMessage + "\". This is a scripted demo response "
-                                + "— swap in a real LoopModelClient for LLM-driven answers.");
+                                + "- swap in a real LoopModelClient for LLM-driven answers.");
             }
 
             @Override

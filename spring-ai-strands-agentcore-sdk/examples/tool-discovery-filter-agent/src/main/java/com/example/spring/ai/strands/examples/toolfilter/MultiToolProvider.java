@@ -25,7 +25,7 @@ public class MultiToolProvider implements ToolCallbackProvider {
         return new FunctionCallback[] {
             namedEcho("admin_secret", "Admin-only (should be excluded by glob)."),
             namedEcho("public_echo", "Echo for public namespace."),
-            namedEcho("demo_calc", "Multiply a*b — JSON {\"a\":int,\"b\":int}."),
+            namedEcho("demo_calc", "Multiply a*b - JSON {\"a\":int,\"b\":int}."),
             namedEcho("alpha_nav", "Navigation alpha (should be excluded by include allowlist).")
         };
     }

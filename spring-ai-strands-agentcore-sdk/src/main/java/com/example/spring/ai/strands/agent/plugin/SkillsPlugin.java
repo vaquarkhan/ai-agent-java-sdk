@@ -11,7 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Built-in plugin that loads "skills" — reusable prompt + tool combinations.
+ * Built-in plugin that loads "skills" - reusable prompt + tool combinations.
  *
  * <p>A {@link Skill} bundles a prompt fragment with a list of required tools.
  * This plugin prepends skill prompt fragments to the conversation as system

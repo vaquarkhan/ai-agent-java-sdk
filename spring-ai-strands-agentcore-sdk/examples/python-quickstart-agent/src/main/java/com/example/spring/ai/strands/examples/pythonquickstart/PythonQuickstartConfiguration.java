@@ -56,7 +56,7 @@ public class PythonQuickstartConfiguration {
                             "letter_counter", "{\"word\":\"strawberry\",\"letter\":\"r\"}");
                     default -> ModelTurnResponse.finalAnswer(
                             "Summary: retrieved current UTC time, divided 3111696/74088, counted "
-                                    + "letter 'r' in \"strawberry\". (Scripted demo model — swap in "
+                                    + "letter 'r' in \"strawberry\". (Scripted demo model - swap in "
                                     + "ChatClient-backed LoopModelClient for a real LLM.)");
                 };
             }

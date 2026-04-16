@@ -85,10 +85,10 @@ All properties use the prefix **`strands.agent`**.
 | Property | Default | Notes |
 |----------|---------|--------|
 | `enabled` | `true` | When `false`, auto-configuration for this module’s beans can be skipped (see `@ConditionalOnProperty`). |
-| `model-provider` | — | **Required.** Logical name for your stack (e.g. bedrock, openai). |
-| `model-id` | — | **Required.** Model identifier; **hidden** from `/configprops`-style exposure via `@JsonIgnore`. |
-| `system-prompt` | — | Mutually exclusive with `system-prompt-resource`. |
-| `system-prompt-resource` | — | `classpath:` or file; **must not** use `http://` or `https://` (validation). |
+| `model-provider` | - | **Required.** Logical name for your stack (e.g. bedrock, openai). |
+| `model-id` | - | **Required.** Model identifier; **hidden** from `/configprops`-style exposure via `@JsonIgnore`. |
+| `system-prompt` | - | Mutually exclusive with `system-prompt-resource`. |
+| `system-prompt-resource` | - | `classpath:` or file; **must not** use `http://` or `https://` (validation). |
 | `max-iterations` | `25` | Must be `>= 1`. |
 | `tool-discovery.enabled` | `true` | If `false`, **`ToolRegistry` is empty** (no tools). |
 | `tool-discovery.include-patterns` | `[]` | Glob allowlist; empty = all (subject to exclude). |
@@ -130,10 +130,10 @@ Replace **`LoopModelClient`** in your application for real model traffic.
 
 **`StrandsObservability`** integrates with **Micrometer** and optional **Observation** APIs. Typical metrics include:
 
-- **`strands.iteration.count`** — iteration count distribution
-- **`strands.loop.duration`** — loop duration timer
-- **`strands.tool.invocations`** — tool invocation counter
-- **`strands.loop.max_iteration_termination`** — count when stopped by max iterations
+- **`strands.iteration.count`** - iteration count distribution
+- **`strands.loop.duration`** - loop duration timer
+- **`strands.tool.invocations`** - tool invocation counter
+- **`strands.loop.max_iteration_termination`** - count when stopped by max iterations
 
 Tool output in traces can be **sanitized** and **truncated** using **`security.*`** trace fields.
 
@@ -308,8 +308,8 @@ public class MyPlugin implements StrandsPlugin {
 ```java
 PluginScanner scanner = new PluginScanner(hookRegistry);
 PluginScanner.ScanResult result = scanner.scan(myPlugin);
-// result.hooksRegistered() — number of hooks found
-// result.toolProviders() — number of tool provider methods found
+// result.hooksRegistered() - number of hooks found
+// result.toolProviders() - number of tool provider methods found
 ```
 
 ---

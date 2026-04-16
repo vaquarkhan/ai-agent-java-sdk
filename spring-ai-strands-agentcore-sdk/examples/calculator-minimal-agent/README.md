@@ -9,9 +9,9 @@ agent = Agent(tools=[calculator])
 agent("What is the square root of 1764?")
 ```
 
-([Strands docs](https://strandsagents.com/docs/user-guide/quickstart/python/) — “Quick Start” calculator snippet.)
+([Strands docs](https://strandsagents.com/docs/user-guide/quickstart/python/) - “Quick Start” calculator snippet.)
 
-This project registers **one** `ToolCallback` (`calculator`) and a **scripted** `LoopModelClient` that invokes `isqrt` for `1764`, then returns a short answer — **no cloud LLM required**.
+This project registers **one** `ToolCallback` (`calculator`) and a **scripted** `LoopModelClient` that invokes `isqrt` for `1764`, then returns a short answer - **no cloud LLM required**.
 
 ## Run
 

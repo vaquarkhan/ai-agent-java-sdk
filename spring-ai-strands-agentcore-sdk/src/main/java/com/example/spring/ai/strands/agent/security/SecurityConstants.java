@@ -7,11 +7,11 @@ import java.util.regex.Pattern;
  *
  * <p>Security logic in this project is intentionally distributed across the classes that enforce it:
  * <ul>
- *   <li>{@link com.example.spring.ai.strands.agent.tool.ToolRegistry} — argument size limits,
+ *   <li>{@link com.example.spring.ai.strands.agent.tool.ToolRegistry} - argument size limits,
  *       execution timeouts, rate limiting, and tool name validation</li>
- *   <li>{@link com.example.spring.ai.strands.agent.config.StrandsAgentProperties} — SSRF prevention,
+ *   <li>{@link com.example.spring.ai.strands.agent.config.StrandsAgentProperties} - SSRF prevention,
  *       actuator property hiding, and configuration validation</li>
- *   <li>{@link com.example.spring.ai.strands.agent.observability.StrandsObservability} — output
+ *   <li>{@link com.example.spring.ai.strands.agent.observability.StrandsObservability} - output
  *       sanitization (AWS keys, JWTs, emails) and trace truncation</li>
  * </ul>
  *

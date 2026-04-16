@@ -4,7 +4,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 /**
- * Minimal agent with a single calculator tool — Java analogue of the Strands Python snippet:
+ * Minimal agent with a single calculator tool - Java analogue of the Strands Python snippet:
  *
  * <pre>
  * from strands import Agent

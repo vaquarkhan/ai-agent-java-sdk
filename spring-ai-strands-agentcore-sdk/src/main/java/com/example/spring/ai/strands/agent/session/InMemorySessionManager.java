@@ -10,7 +10,7 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  * <p>Useful for development and testing. For production use with persistence,
  * consider {@link FileSessionManager} or a database-backed implementation
- * (e.g., DynamoDB — see extension point documentation).
+ * (e.g., DynamoDB - see extension point documentation).
  *
  * <p>Note: DynamoDB session manager is out of scope for this module since it
  * requires the AWS SDK dependency. It can be implemented as an extension by

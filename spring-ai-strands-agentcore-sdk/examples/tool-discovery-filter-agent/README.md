@@ -1,6 +1,6 @@
 # Tool discovery filters (include / exclude)
 
-**High value for production:** Spring may register **many** `ToolCallbackProvider` beans (MCP, AgentCore browser tools, your own). The Strands SDK can **narrow** which tool names the model sees using **glob** patterns — **exclude wins over include** (deny-over-allow).
+**High value for production:** Spring may register **many** `ToolCallbackProvider` beans (MCP, AgentCore browser tools, your own). The Strands SDK can **narrow** which tool names the model sees using **glob** patterns - **exclude wins over include** (deny-over-allow).
 
 This example registers **four** tools:
 
@@ -13,7 +13,7 @@ This example registers **four** tools:
 
 With non-empty `include-patterns`, only tools that match **at least one** include **and** no exclude pattern are kept.
 
-A **scripted** `LoopModelClient` calls `demo_calc` once (6×7) then summarizes.
+A **scripted** `LoopModelClient` calls `demo_calc` once (6�-7) then summarizes.
 
 ## Run
 

@@ -41,7 +41,7 @@ Optional custom message:
 curl -s --get "http://localhost:8088/api/quickstart" --data-urlencode "message=What is 144 divided by 12?"
 ```
 
-(With the scripted model, custom prompts still follow the same fixed tool sequence when prior tool outputs are 0–2; swap in a real `LoopModelClient` for LLM-driven behavior.)
+(With the scripted model, custom prompts still follow the same fixed tool sequence when prior tool outputs are 0-2; swap in a real `LoopModelClient` for LLM-driven behavior.)
 
 ## Author
 

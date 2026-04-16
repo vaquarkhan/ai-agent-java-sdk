@@ -4,7 +4,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 /**
- * Demonstrates {@code StrandsAgent#executeStreaming} behind HTTP SSE — common for chat UIs and AgentCore-style runtimes.
+ * Demonstrates {@code StrandsAgent#executeStreaming} behind HTTP SSE - common for chat UIs and AgentCore-style runtimes.
  *
  * @author Vaquar Khan
  */
