@@ -1,5 +1,7 @@
 package com.example.spring.ai.strands.agent.execution;
 
+import com.example.spring.ai.strands.agent.approval.ApprovalDecision;
+import com.example.spring.ai.strands.agent.approval.ApprovalManager;
 import com.example.spring.ai.strands.agent.conversation.ConversationManager;
 import com.example.spring.ai.strands.agent.execution.stream.StreamEvent;
 import com.example.spring.ai.strands.agent.hook.HookRegistry;
@@ -37,6 +39,7 @@ public class StrandsExecutionLoop {
     private final int maxIterations;
     private final String agentId;
     private HookRegistry hookRegistry;
+    private ApprovalManager approvalManager;
     private ConversationManager conversationManager;
     private boolean retryEnabled;
     private int maxRetries;
@@ -54,6 +57,14 @@ public class StrandsExecutionLoop {
 
     public HookRegistry getHookRegistry() {
         return hookRegistry;
+    }
+
+    public void setApprovalManager(ApprovalManager approvalManager) {
+        this.approvalManager = approvalManager;
+    }
+
+    public ApprovalManager getApprovalManager() {
+        return approvalManager;
     }
 
     public void setConversationManager(ConversationManager conversationManager) {
@@ -113,7 +124,16 @@ public class StrandsExecutionLoop {
                             history.add(new ExecutionMessage("tool", eval.denialOutput()));
                             continue;
                         }
-                        ToolCallRequest controlled = eval.request();
+                        ToolCallRequest controlled = requireApproval(iteration, eval.request(), context);
+                        if (controlled == null) {
+                            ToolExecutionResult deniedResult = new ToolExecutionResult(
+                                    request.toolName(), false, "{\"error\":\"approval_denied\"}", Duration.ZERO);
+                            dispatchHook(new StrandsHookEvent.AfterToolCall(iteration, request.toolName(), deniedResult));
+                            trace = observability.recordIteration(trace, iteration, request.toolName(), request.arguments(),
+                                    deniedResult.output(), Duration.between(iterationStart, Instant.now()));
+                            history.add(new ExecutionMessage("tool", deniedResult.output()));
+                            continue;
+                        }
                         dispatchHook(new StrandsHookEvent.BeforeToolCall(
                                 iteration, controlled.toolName(), controlled.arguments()));
                         allowedRequests.add(controlled);
@@ -145,7 +165,18 @@ public class StrandsExecutionLoop {
                         history.add(new ExecutionMessage("tool", eval.denialOutput()));
                         continue;
                     }
-                    request = eval.request();
+                    request = requireApproval(iteration, eval.request(), context);
+                    if (request == null) {
+                        ToolExecutionResult deniedResult = new ToolExecutionResult(
+                                response.toolCallRequest().toolName(), false, "{\"error\":\"approval_denied\"}", Duration.ZERO);
+                        dispatchHook(new StrandsHookEvent.AfterToolCall(
+                                iteration, response.toolCallRequest().toolName(), deniedResult));
+                        trace = observability.recordIteration(trace, iteration, response.toolCallRequest().toolName(),
+                                response.toolCallRequest().arguments(), deniedResult.output(),
+                                Duration.between(iterationStart, Instant.now()));
+                        history.add(new ExecutionMessage("tool", deniedResult.output()));
+                        continue;
+                    }
 
                     // Dispatch before-tool-call hook
                     dispatchHook(new StrandsHookEvent.BeforeToolCall(iteration, request.toolName(), request.arguments()));
@@ -227,7 +258,14 @@ public class StrandsExecutionLoop {
                                     request.arguments(), eval.denialOutput(), Duration.between(iterationStart, Instant.now()));
                             history.add(new ExecutionMessage("tool", eval.denialOutput()));
                         } else {
-                            ToolCallRequest controlled = eval.request();
+                            ToolCallRequest controlled = requireApproval(iteration, eval.request(), context);
+                            if (controlled == null) {
+                                String denialOutput = "{\"error\":\"approval_denied\"}";
+                                trace = observability.recordIteration(trace, iteration, request.toolName(),
+                                        request.arguments(), denialOutput, Duration.between(iterationStart, Instant.now()));
+                                history.add(new ExecutionMessage("tool", denialOutput));
+                                continue;
+                            }
                             ToolExecutionResult toolResult = toolRegistry.executeTool(
                                     controlled.toolName(), controlled.arguments());
                             trace = observability.recordIteration(trace, iteration, controlled.toolName(),
@@ -325,6 +363,19 @@ public class StrandsExecutionLoop {
             return ToolCallEvaluation.denied(decision.denialOutput());
         }
         return ToolCallEvaluation.allowed(new ToolCallRequest(request.toolName(), decision.arguments()));
+    }
+
+    private ToolCallRequest requireApproval(int iteration, ToolCallRequest request, StrandsExecutionContext context) {
+        if (approvalManager == null || request == null) {
+            return request;
+        }
+        ApprovalDecision decision = approvalManager.awaitApproval(
+                iteration, request.toolName(), request.arguments(), context);
+        if (decision == null || !decision.approved()) {
+            return null;
+        }
+        String arguments = decision.arguments() != null ? decision.arguments() : request.arguments();
+        return new ToolCallRequest(request.toolName(), arguments);
     }
 
     private record ToolCallEvaluation(ToolCallRequest request, boolean allowed, String denialOutput) {

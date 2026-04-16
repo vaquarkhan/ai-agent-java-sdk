@@ -1,6 +1,7 @@
 package com.example.spring.ai.strands.agent;
 
 import com.example.spring.ai.strands.agent.api.Advisor;
+import com.example.spring.ai.strands.agent.approval.ApprovalManager;
 import com.example.spring.ai.strands.agent.config.StrandsAgentProperties;
 import com.example.spring.ai.strands.agent.config.StrandsAgentPropertiesValidator;
 import com.example.spring.ai.strands.agent.execution.ExecutionMessage;
@@ -35,6 +36,7 @@ public class StrandsAgent {
     private final List<Advisor> advisors;
     private final StrandsObservability observability;
     private HookRegistry hookRegistry;
+    private ApprovalManager approvalManager;
     private SessionManager sessionManager;
     private List<StrandsPlugin> plugins;
 
@@ -57,6 +59,15 @@ public class StrandsAgent {
 
     public HookRegistry getHookRegistry() {
         return hookRegistry;
+    }
+
+    public void setApprovalManager(ApprovalManager approvalManager) {
+        this.approvalManager = approvalManager;
+        this.executionLoop.setApprovalManager(approvalManager);
+    }
+
+    public ApprovalManager getApprovalManager() {
+        return approvalManager;
     }
 
     public void setSessionManager(SessionManager sessionManager) {
