@@ -5,6 +5,8 @@ package com.example.spring.ai.strands.agent.execution;
  */
 import com.example.spring.ai.strands.agent.config.StrandsAgentProperties;
 import com.example.spring.ai.strands.agent.execution.stream.StreamEvent;
+import com.example.spring.ai.strands.agent.hook.HookRegistry;
+import com.example.spring.ai.strands.agent.hook.ToolCallPolicyDecision;
 import com.example.spring.ai.strands.agent.model.TerminationReason;
 import com.example.spring.ai.strands.agent.observability.StrandsObservability;
 import com.example.spring.ai.strands.agent.support.MockModelClient;
@@ -14,6 +16,7 @@ import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import io.micrometer.observation.ObservationRegistry;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 import org.junit.jupiter.api.Test;
 import reactor.test.StepVerifier;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -104,6 +107,51 @@ class StrandsExecutionLoopTest {
                         registry, observability(), StrandsExecutionContext.standalone("s")))
                 .expectNext("hel", "lo")
                 .verifyComplete();
+    }
+
+    @Test
+    void toolPolicyCanDenyToolExecution() {
+        MockModelClient modelClient = new MockModelClient()
+                .addResponse(ModelTurnResponse.toolCall("calc", "{\"x\":2}"))
+                .addResponse(ModelTurnResponse.finalAnswer("done"));
+        ToolRegistry registry = new ToolRegistry(
+                Map.of("calc", new TestToolCallback("calc", "c", a -> {
+                    throw new IllegalStateException("tool should have been denied");
+                })),
+                new StrandsAgentProperties.Security());
+        StrandsExecutionLoop loop = new StrandsExecutionLoop(modelClient, 5, "agent");
+        HookRegistry hookRegistry = new HookRegistry();
+        hookRegistry.registerToolCallPolicy((iteration, toolName, arguments) ->
+                ToolCallPolicyDecision.deny("{\"error\":\"approval_required\"}"));
+        loop.setHookRegistry(hookRegistry);
+
+        StrandsLoopResult result = loop.run("sys", List.of(new ExecutionMessage("user", "2+2")),
+                registry, observability(), StrandsExecutionContext.standalone("s"));
+        assertEquals("done", result.content());
+    }
+
+    @Test
+    void toolPolicyCanRewriteArguments() {
+        MockModelClient modelClient = new MockModelClient()
+                .addResponse(ModelTurnResponse.toolCall("calc", "{\"x\":2}"))
+                .addResponse(ModelTurnResponse.finalAnswer("done"));
+        AtomicReference<String> seenArguments = new AtomicReference<>();
+        ToolRegistry registry = new ToolRegistry(
+                Map.of("calc", new TestToolCallback("calc", "c", a -> {
+                    seenArguments.set(a);
+                    return "4";
+                })),
+                new StrandsAgentProperties.Security());
+        StrandsExecutionLoop loop = new StrandsExecutionLoop(modelClient, 5, "agent");
+        HookRegistry hookRegistry = new HookRegistry();
+        hookRegistry.registerToolCallPolicy((iteration, toolName, arguments) ->
+                ToolCallPolicyDecision.allow("{\"x\":99}"));
+        loop.setHookRegistry(hookRegistry);
+
+        StrandsLoopResult result = loop.run("sys", List.of(new ExecutionMessage("user", "2+2")),
+                registry, observability(), StrandsExecutionContext.standalone("s"));
+        assertEquals("done", result.content());
+        assertEquals("{\"x\":99}", seenArguments.get());
     }
 
     private ToolRegistry emptyRegistry() {

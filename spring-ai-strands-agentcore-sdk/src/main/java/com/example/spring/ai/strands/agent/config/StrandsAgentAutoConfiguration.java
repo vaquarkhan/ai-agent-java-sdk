@@ -1,6 +1,7 @@
 package com.example.spring.ai.strands.agent.config;
 
 import com.example.spring.ai.strands.agent.StrandsAgent;
+import com.example.spring.ai.strands.agent.approval.ApprovalManager;
 import com.example.spring.ai.strands.agent.api.Advisor;
 import com.example.spring.ai.strands.agent.execution.ChatModelLoopModelClient;
 import com.example.spring.ai.strands.agent.execution.LoopModelClient;
@@ -21,6 +22,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
+import org.springframework.beans.factory.ObjectProvider;
 
 /**
  * @author Vaquar Khan
@@ -53,8 +55,13 @@ public class StrandsAgentAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public StrandsExecutionLoop strandsExecutionLoop(LoopModelClient modelClient, StrandsAgentProperties properties) {
-        return new StrandsExecutionLoop(modelClient, properties.getMaxIterations(), "strands-agent");
+    public StrandsExecutionLoop strandsExecutionLoop(
+            LoopModelClient modelClient,
+            StrandsAgentProperties properties,
+            ObjectProvider<ApprovalManager> approvalManagerProvider) {
+        StrandsExecutionLoop loop = new StrandsExecutionLoop(modelClient, properties.getMaxIterations(), "strands-agent");
+        loop.setApprovalManager(approvalManagerProvider.getIfAvailable());
+        return loop;
     }
 
     @Bean
@@ -85,7 +92,13 @@ public class StrandsAgentAutoConfiguration {
             ToolRegistry toolRegistry,
             StrandsAgentProperties properties,
             List<Advisor> advisors,
-            StrandsObservability observability) {
-        return new StrandsAgent(executionLoop, toolRegistry, properties, advisors, observability);
+            StrandsObservability observability,
+            ObjectProvider<ApprovalManager> approvalManagerProvider) {
+        StrandsAgent agent = new StrandsAgent(executionLoop, toolRegistry, properties, advisors, observability);
+        ApprovalManager approvalManager = approvalManagerProvider.getIfAvailable();
+        if (approvalManager != null) {
+            agent.setApprovalManager(approvalManager);
+        }
+        return agent;
     }
 }

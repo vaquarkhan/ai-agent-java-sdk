@@ -12,6 +12,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -39,7 +40,7 @@ public final class ToolRegistry {
 
     private final Map<String, ToolCallback> tools;
     private final StrandsAgentProperties.Security security;
-    private int callsThisLoop;
+    private final AtomicInteger callsThisLoop = new AtomicInteger();
 
     public ToolRegistry(Map<String, ToolCallback> tools, StrandsAgentProperties.Security security) {
         this.tools = Collections.unmodifiableMap(new LinkedHashMap<>(tools));
@@ -48,7 +49,7 @@ public final class ToolRegistry {
 
     /** Reset per-loop counters (call at the start of each execution loop run). */
     public void beginNewLoop() {
-        this.callsThisLoop = 0;
+        this.callsThisLoop.set(0);
     }
 
     public List<ToolDefinition> getToolDefinitions() {
@@ -84,7 +85,7 @@ public final class ToolRegistry {
                     Duration.ZERO);
         }
         int max = security.getToolRateLimit();
-        if (max > 0 && callsThisLoop >= max) {
+        if (max > 0 && callsThisLoop.get() >= max) {
             return new ToolExecutionResult(
                     toolName,
                     false,
@@ -99,7 +100,23 @@ public final class ToolRegistry {
                     "{\"error\":\"tool_argument_too_large\"}",
                     Duration.ZERO);
         }
-        callsThisLoop++;
+        if (max > 0) {
+            while (true) {
+                int current = callsThisLoop.get();
+                if (current >= max) {
+                    return new ToolExecutionResult(
+                            toolName,
+                            false,
+                            RATE_LIMIT_MESSAGE,
+                            Duration.ZERO);
+                }
+                if (callsThisLoop.compareAndSet(current, current + 1)) {
+                    break;
+                }
+            }
+        } else {
+            callsThisLoop.incrementAndGet();
+        }
         Instant start = Instant.now();
         ExecutorService executor = Executors.newSingleThreadExecutor(r -> {
             Thread t = new Thread(r, "strands-tool-" + toolName);

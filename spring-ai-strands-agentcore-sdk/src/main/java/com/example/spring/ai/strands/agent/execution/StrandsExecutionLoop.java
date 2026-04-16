@@ -1,9 +1,12 @@
 package com.example.spring.ai.strands.agent.execution;
 
+import com.example.spring.ai.strands.agent.approval.ApprovalDecision;
+import com.example.spring.ai.strands.agent.approval.ApprovalManager;
 import com.example.spring.ai.strands.agent.conversation.ConversationManager;
 import com.example.spring.ai.strands.agent.execution.stream.StreamEvent;
 import com.example.spring.ai.strands.agent.hook.HookRegistry;
 import com.example.spring.ai.strands.agent.hook.StrandsHookEvent;
+import com.example.spring.ai.strands.agent.hook.ToolCallPolicyDecision;
 import com.example.spring.ai.strands.agent.model.ReasoningTrace;
 import com.example.spring.ai.strands.agent.model.TerminationReason;
 import com.example.spring.ai.strands.agent.model.ToolExecutionResult;
@@ -36,6 +39,7 @@ public class StrandsExecutionLoop {
     private final int maxIterations;
     private final String agentId;
     private HookRegistry hookRegistry;
+    private ApprovalManager approvalManager;
     private ConversationManager conversationManager;
     private boolean retryEnabled;
     private int maxRetries;
@@ -53,6 +57,14 @@ public class StrandsExecutionLoop {
 
     public HookRegistry getHookRegistry() {
         return hookRegistry;
+    }
+
+    public void setApprovalManager(ApprovalManager approvalManager) {
+        this.approvalManager = approvalManager;
+    }
+
+    public ApprovalManager getApprovalManager() {
+        return approvalManager;
     }
 
     public void setConversationManager(ConversationManager conversationManager) {
@@ -100,13 +112,39 @@ public class StrandsExecutionLoop {
                 // Handle parallel tool calls
                 if (response.hasMultipleToolCalls()) {
                     List<ToolCallRequest> requests = response.toolCallRequests();
+                    List<ToolCallRequest> allowedRequests = new ArrayList<>();
                     for (ToolCallRequest request : requests) {
-                        dispatchHook(new StrandsHookEvent.BeforeToolCall(iteration, request.toolName(), request.arguments()));
+                        ToolCallEvaluation eval = evaluateToolCall(iteration, request);
+                        if (!eval.allowed()) {
+                            ToolExecutionResult deniedResult = new ToolExecutionResult(
+                                    request.toolName(), false, eval.denialOutput(), Duration.ZERO);
+                            dispatchHook(new StrandsHookEvent.AfterToolCall(iteration, request.toolName(), deniedResult));
+                            trace = observability.recordIteration(trace, iteration, request.toolName(), request.arguments(),
+                                    eval.denialOutput(), Duration.between(iterationStart, Instant.now()));
+                            history.add(new ExecutionMessage("tool", eval.denialOutput()));
+                            continue;
+                        }
+                        ToolCallRequest controlled = requireApproval(iteration, eval.request(), context);
+                        if (controlled == null) {
+                            ToolExecutionResult deniedResult = new ToolExecutionResult(
+                                    request.toolName(), false, "{\"error\":\"approval_denied\"}", Duration.ZERO);
+                            dispatchHook(new StrandsHookEvent.AfterToolCall(iteration, request.toolName(), deniedResult));
+                            trace = observability.recordIteration(trace, iteration, request.toolName(), request.arguments(),
+                                    deniedResult.output(), Duration.between(iterationStart, Instant.now()));
+                            history.add(new ExecutionMessage("tool", deniedResult.output()));
+                            continue;
+                        }
+                        dispatchHook(new StrandsHookEvent.BeforeToolCall(
+                                iteration, controlled.toolName(), controlled.arguments()));
+                        allowedRequests.add(controlled);
                     }
-                    List<ToolExecutionResult> results = toolRegistry.executeToolsParallel(requests);
+                    if (allowedRequests.isEmpty()) {
+                        continue;
+                    }
+                    List<ToolExecutionResult> results = toolRegistry.executeToolsParallel(allowedRequests);
                     for (int i = 0; i < results.size(); i++) {
                         ToolExecutionResult toolResult = results.get(i);
-                        ToolCallRequest request = requests.get(i);
+                        ToolCallRequest request = allowedRequests.get(i);
                         dispatchHook(new StrandsHookEvent.AfterToolCall(iteration, request.toolName(), toolResult));
                         trace = observability.recordIteration(trace, iteration, request.toolName(), request.arguments(),
                                 toolResult.output(), Duration.between(iterationStart, Instant.now()));
@@ -117,6 +155,28 @@ public class StrandsExecutionLoop {
 
                 if (response.hasToolCall()) {
                     ToolCallRequest request = response.toolCallRequest();
+                    ToolCallEvaluation eval = evaluateToolCall(iteration, request);
+                    if (!eval.allowed()) {
+                        ToolExecutionResult deniedResult = new ToolExecutionResult(
+                                request.toolName(), false, eval.denialOutput(), Duration.ZERO);
+                        dispatchHook(new StrandsHookEvent.AfterToolCall(iteration, request.toolName(), deniedResult));
+                        trace = observability.recordIteration(trace, iteration, request.toolName(), request.arguments(),
+                                eval.denialOutput(), Duration.between(iterationStart, Instant.now()));
+                        history.add(new ExecutionMessage("tool", eval.denialOutput()));
+                        continue;
+                    }
+                    request = requireApproval(iteration, eval.request(), context);
+                    if (request == null) {
+                        ToolExecutionResult deniedResult = new ToolExecutionResult(
+                                response.toolCallRequest().toolName(), false, "{\"error\":\"approval_denied\"}", Duration.ZERO);
+                        dispatchHook(new StrandsHookEvent.AfterToolCall(
+                                iteration, response.toolCallRequest().toolName(), deniedResult));
+                        trace = observability.recordIteration(trace, iteration, response.toolCallRequest().toolName(),
+                                response.toolCallRequest().arguments(), deniedResult.output(),
+                                Duration.between(iterationStart, Instant.now()));
+                        history.add(new ExecutionMessage("tool", deniedResult.output()));
+                        continue;
+                    }
 
                     // Dispatch before-tool-call hook
                     dispatchHook(new StrandsHookEvent.BeforeToolCall(iteration, request.toolName(), request.arguments()));
@@ -191,12 +251,28 @@ public class StrandsExecutionLoop {
                         sink.next(token.value());
                     } else if (event instanceof StreamEvent.ToolCallBoundary boundary) {
                         hadToolCall = true;
-                        ToolExecutionResult toolResult = toolRegistry.executeTool(
-                                boundary.request().toolName(), boundary.request().arguments());
-                        trace = observability.recordIteration(trace, iteration, boundary.request().toolName(),
-                                boundary.request().arguments(), toolResult.output(),
-                                Duration.between(iterationStart, Instant.now()));
-                        history.add(new ExecutionMessage("tool", toolResult.output()));
+                        ToolCallRequest request = boundary.request();
+                        ToolCallEvaluation eval = evaluateToolCall(iteration, request);
+                        if (!eval.allowed()) {
+                            trace = observability.recordIteration(trace, iteration, request.toolName(),
+                                    request.arguments(), eval.denialOutput(), Duration.between(iterationStart, Instant.now()));
+                            history.add(new ExecutionMessage("tool", eval.denialOutput()));
+                        } else {
+                            ToolCallRequest controlled = requireApproval(iteration, eval.request(), context);
+                            if (controlled == null) {
+                                String denialOutput = "{\"error\":\"approval_denied\"}";
+                                trace = observability.recordIteration(trace, iteration, request.toolName(),
+                                        request.arguments(), denialOutput, Duration.between(iterationStart, Instant.now()));
+                                history.add(new ExecutionMessage("tool", denialOutput));
+                                continue;
+                            }
+                            ToolExecutionResult toolResult = toolRegistry.executeTool(
+                                    controlled.toolName(), controlled.arguments());
+                            trace = observability.recordIteration(trace, iteration, controlled.toolName(),
+                                    controlled.arguments(), toolResult.output(),
+                                    Duration.between(iterationStart, Instant.now()));
+                            history.add(new ExecutionMessage("tool", toolResult.output()));
+                        }
                     } else if (event instanceof StreamEvent.Complete complete) {
                         if (!complete.finalText().isBlank()) {
                             history.add(new ExecutionMessage("assistant", complete.finalText()));
@@ -275,6 +351,40 @@ public class StrandsExecutionLoop {
     private void dispatchHook(StrandsHookEvent event) {
         if (hookRegistry != null) {
             hookRegistry.dispatch(event);
+        }
+    }
+
+    private ToolCallEvaluation evaluateToolCall(int iteration, ToolCallRequest request) {
+        if (hookRegistry == null) {
+            return ToolCallEvaluation.allowed(request);
+        }
+        ToolCallPolicyDecision decision = hookRegistry.evaluateToolCall(iteration, request.toolName(), request.arguments());
+        if (!decision.allowed()) {
+            return ToolCallEvaluation.denied(decision.denialOutput());
+        }
+        return ToolCallEvaluation.allowed(new ToolCallRequest(request.toolName(), decision.arguments()));
+    }
+
+    private ToolCallRequest requireApproval(int iteration, ToolCallRequest request, StrandsExecutionContext context) {
+        if (approvalManager == null || request == null) {
+            return request;
+        }
+        ApprovalDecision decision = approvalManager.awaitApproval(
+                iteration, request.toolName(), request.arguments(), context);
+        if (decision == null || !decision.approved()) {
+            return null;
+        }
+        String arguments = decision.arguments() != null ? decision.arguments() : request.arguments();
+        return new ToolCallRequest(request.toolName(), arguments);
+    }
+
+    private record ToolCallEvaluation(ToolCallRequest request, boolean allowed, String denialOutput) {
+        static ToolCallEvaluation allowed(ToolCallRequest request) {
+            return new ToolCallEvaluation(request, true, null);
+        }
+
+        static ToolCallEvaluation denied(String denialOutput) {
+            return new ToolCallEvaluation(null, false, denialOutput);
         }
     }
 
