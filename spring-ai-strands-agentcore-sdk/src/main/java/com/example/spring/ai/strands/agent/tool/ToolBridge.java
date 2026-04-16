@@ -11,7 +11,6 @@ import java.util.Map;
 import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.ai.model.function.FunctionCallback;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.ToolCallbackProvider;
 
@@ -42,10 +41,7 @@ public final class ToolBridge {
         List<String> include = discovery.getIncludePatterns();
         List<String> exclude = discovery.getExcludePatterns();
         for (ToolCallbackProvider provider : providers) {
-            for (FunctionCallback functionCallback : provider.getToolCallbacks()) {
-                if (!(functionCallback instanceof ToolCallback callback)) {
-                    continue;
-                }
+            for (ToolCallback callback : provider.getToolCallbacks()) {
                 String name = callback.getToolDefinition().name();
                 if (!SAFE_TOOL_NAME.matcher(name).matches()) {
                     log.warn("Skipping tool with invalid name: {}", name);

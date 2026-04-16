@@ -6,7 +6,6 @@ import com.example.spring.ai.strands.agent.execution.ModelTurnResponse;
 import com.example.spring.ai.strands.agent.execution.ToolCallRequest;
 import com.example.spring.ai.strands.agent.execution.stream.StreamEvent;
 import java.util.List;
-import org.springframework.ai.model.function.FunctionCallback;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.ToolCallbackProvider;
 import org.springframework.context.annotation.Bean;
@@ -27,7 +26,7 @@ public class ToolAgentConfiguration {
 
     @Bean
     public ToolCallbackProvider toolAgentCallbackProvider() {
-        return () -> new FunctionCallback[] {
+        return () -> new ToolCallback[] {
             ToolAgentToolCallbacks.weatherLookup(),
             ToolAgentToolCallbacks.unitConverter()
         };

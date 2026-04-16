@@ -9,7 +9,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.List;
-import org.springframework.ai.model.function.FunctionCallback;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.ToolCallbackProvider;
 import org.springframework.ai.tool.definition.DefaultToolDefinition;
@@ -31,7 +30,7 @@ public class CalculatorMinimalConfiguration {
 
     @Bean
     public ToolCallbackProvider calculatorOnly() {
-        return () -> new FunctionCallback[] {calculatorTool()};
+        return () -> new ToolCallback[] {calculatorTool()};
     }
 
     static ToolCallback calculatorTool() {

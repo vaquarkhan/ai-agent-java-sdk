@@ -7,7 +7,7 @@ import com.example.spring.ai.strands.agent.hook.StrandsHookEvent;
 import com.example.spring.ai.strands.agent.support.TestToolCallback;
 import java.util.List;
 import org.junit.jupiter.api.Test;
-import org.springframework.ai.model.function.FunctionCallback;
+import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.ToolCallbackProvider;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -99,7 +99,7 @@ class PluginScannerTest {
         }
 
         public ToolCallbackProvider myTools() {
-            return () -> new FunctionCallback[] {
+            return () -> new ToolCallback[] {
                     new TestToolCallback("plugin_tool", "A plugin tool", args -> "result")
             };
         }
@@ -124,7 +124,7 @@ class PluginScannerTest {
         }
 
         public ToolCallbackProvider tools() {
-            return () -> new FunctionCallback[] {
+            return () -> new ToolCallback[] {
                     new TestToolCallback("full_tool", "Full plugin tool", args -> "ok")
             };
         }

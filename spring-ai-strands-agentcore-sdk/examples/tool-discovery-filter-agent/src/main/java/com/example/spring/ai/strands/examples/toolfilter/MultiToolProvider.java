@@ -3,7 +3,6 @@ package com.example.spring.ai.strands.examples.toolfilter;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import org.springframework.ai.model.function.FunctionCallback;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.ToolCallbackProvider;
 import org.springframework.ai.tool.definition.DefaultToolDefinition;
@@ -21,8 +20,8 @@ public class MultiToolProvider implements ToolCallbackProvider {
     private static final ObjectMapper JSON = new ObjectMapper();
 
     @Override
-    public FunctionCallback[] getToolCallbacks() {
-        return new FunctionCallback[] {
+    public ToolCallback[] getToolCallbacks() {
+        return new ToolCallback[] {
             namedEcho("admin_secret", "Admin-only (should be excluded by glob)."),
             namedEcho("public_echo", "Echo for public namespace."),
             namedEcho("demo_calc", "Multiply a*b - JSON {\"a\":int,\"b\":int}."),

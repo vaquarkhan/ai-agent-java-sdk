@@ -4,7 +4,6 @@ package com.example.spring.ai.strands.agent.support;
  * @author Vaquar Khan
  */
 import java.util.List;
-import org.springframework.ai.model.function.FunctionCallback;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.ToolCallbackProvider;
 
@@ -17,7 +16,7 @@ public class MockToolCallbackProvider implements ToolCallbackProvider {
     }
 
     @Override
-    public FunctionCallback[] getToolCallbacks() {
-        return callbacks.toArray(FunctionCallback[]::new);
+    public ToolCallback[] getToolCallbacks() {
+        return callbacks.toArray(ToolCallback[]::new);
     }
 }
