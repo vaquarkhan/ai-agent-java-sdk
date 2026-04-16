@@ -2,6 +2,7 @@ package com.example.spring.ai.strands.agent.config;
 
 import com.example.spring.ai.strands.agent.StrandsAgent;
 import com.example.spring.ai.strands.agent.api.Advisor;
+import com.example.spring.ai.strands.agent.execution.ChatModelLoopModelClient;
 import com.example.spring.ai.strands.agent.execution.LoopModelClient;
 import com.example.spring.ai.strands.agent.execution.NoopLoopModelClient;
 import com.example.spring.ai.strands.agent.execution.StrandsExecutionLoop;
@@ -12,8 +13,10 @@ import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import io.micrometer.observation.ObservationRegistry;
 import java.util.List;
+import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.tool.ToolCallbackProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -36,8 +39,15 @@ public class StrandsAgentAutoConfiguration {
     }
 
     @Bean
-    @ConditionalOnMissingBean
-    public LoopModelClient strandsLoopModelClient() {
+    @ConditionalOnBean(ChatModel.class)
+    @ConditionalOnMissingBean(LoopModelClient.class)
+    public LoopModelClient strandsChatModelLoopModelClient(ChatModel chatModel) {
+        return new ChatModelLoopModelClient(chatModel);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(LoopModelClient.class)
+    public LoopModelClient strandsNoopLoopModelClient() {
         return new NoopLoopModelClient();
     }
 
