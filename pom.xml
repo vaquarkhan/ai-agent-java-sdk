@@ -5,28 +5,38 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.example.spring.ai</groupId>
-    <artifactId>spring-ai-agentcore</artifactId>
+    <artifactId>ai-agent-java-sdk</artifactId>
     <version>0.1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
-    <name>spring-ai-agentcore</name>
+    <name>AI Agent Java SDK</name>
+    <description>
+        Single-root Maven reactor: core library, optional DynamoDB session extension, and runnable examples.
+        Spring AI + optional Spring AI AgentCore BOM alignment (no git submodules; dependencies resolve from Maven Central).
+    </description>
 
     <modules>
-        <module>spring-ai-strands-agentcore-sdk</module>
-        <module>spring-ai-strands-agentcore-sdk/examples/quickstart-agent</module>
-        <module>spring-ai-strands-agentcore-sdk/examples/calculator-minimal-agent</module>
-        <module>spring-ai-strands-agentcore-sdk/examples/streaming-sse-agent</module>
-        <module>spring-ai-strands-agentcore-sdk/examples/tool-discovery-filter-agent</module>
-        <module>spring-ai-strands-agentcore-sdk/examples/minimal-agent</module>
-        <module>spring-ai-strands-agentcore-sdk/examples/streaming-agent</module>
-        <module>spring-ai-strands-agentcore-sdk/examples/tool-agent</module>
+        <module>ai-agent-java-sdk-core</module>
+        <module>ai-agent-java-sdk-dynamodb-session-manager</module>
+        <module>examples/quickstart-agent</module>
+        <module>examples/calculator-minimal-agent</module>
+        <module>examples/streaming-sse-agent</module>
+        <module>examples/tool-discovery-filter-agent</module>
+        <module>examples/minimal-agent</module>
+        <module>examples/streaming-agent</module>
+        <module>examples/tool-agent</module>
     </modules>
 
     <properties>
         <java.version>17</java.version>
         <spring-boot.version>3.5.9</spring-boot.version>
         <spring-ai.version>1.1.2</spring-ai.version>
+        <!-- Align optional AgentCore modules (runtime, memory, browser, …) without vendoring the repo:
+             https://github.com/spring-ai-community/spring-ai-agentcore -->
+        <spring-ai-agentcore.version>1.0.0</spring-ai-agentcore.version>
         <maven.compiler.release>${java.version}</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven-compiler-plugin.version>3.13.0</maven-compiler-plugin.version>
+        <maven-surefire-plugin.version>3.3.0</maven-surefire-plugin.version>
     </properties>
 
     <dependencyManagement>
@@ -45,6 +55,48 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
+            <dependency>
+                <groupId>org.springaicommunity</groupId>
+                <artifactId>spring-ai-agentcore-bom</artifactId>
+                <version>${spring-ai-agentcore.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <!-- Internal reactor -->
+            <dependency>
+                <groupId>com.example.spring.ai</groupId>
+                <artifactId>ai-agent-java-sdk-core</artifactId>
+                <version>${project.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>${maven-compiler-plugin.version}</version>
+                    <configuration>
+                        <release>${maven.compiler.release}</release>
+                        <parameters>true</parameters>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>${maven-surefire-plugin.version}</version>
+                    <configuration>
+                        <useModulePath>false</useModulePath>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-maven-plugin</artifactId>
+                    <version>${spring-boot.version}</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
 </project>
