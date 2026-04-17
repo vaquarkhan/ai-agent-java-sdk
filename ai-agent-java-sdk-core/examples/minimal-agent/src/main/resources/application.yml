@@ -1,0 +1,15 @@
+spring:
+  application:
+    name: minimal-agent-example
+
+ai:
+  agent:
+    model-provider: demo
+    model-id: minimal-scripted
+    system-prompt: "You are a concise assistant."
+    max-iterations: 4
+    tool-discovery:
+      enabled: false
+
+server:
+  port: 8092

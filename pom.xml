@@ -5,21 +5,21 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.example.spring.ai</groupId>
-    <artifactId>spring-ai-agentcore</artifactId>
+    <artifactId>ai-agent-java-sdk</artifactId>
     <version>0.1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
-    <name>spring-ai-agentcore</name>
+    <name>AI Agent Java SDK</name>
 
     <modules>
-        <module>spring-ai-strands-agentcore-sdk</module>
-        <module>spring-ai-strands-agentcore-sdk/extensions/dynamodb-session-manager</module>
-        <module>spring-ai-strands-agentcore-sdk/examples/quickstart-agent</module>
-        <module>spring-ai-strands-agentcore-sdk/examples/calculator-minimal-agent</module>
-        <module>spring-ai-strands-agentcore-sdk/examples/streaming-sse-agent</module>
-        <module>spring-ai-strands-agentcore-sdk/examples/tool-discovery-filter-agent</module>
-        <module>spring-ai-strands-agentcore-sdk/examples/minimal-agent</module>
-        <module>spring-ai-strands-agentcore-sdk/examples/streaming-agent</module>
-        <module>spring-ai-strands-agentcore-sdk/examples/tool-agent</module>
+        <module>ai-agent-java-sdk-core</module>
+        <module>ai-agent-java-sdk-core/extensions/dynamodb-session-manager</module>
+        <module>ai-agent-java-sdk-core/examples/quickstart-agent</module>
+        <module>ai-agent-java-sdk-core/examples/calculator-minimal-agent</module>
+        <module>ai-agent-java-sdk-core/examples/streaming-sse-agent</module>
+        <module>ai-agent-java-sdk-core/examples/tool-discovery-filter-agent</module>
+        <module>ai-agent-java-sdk-core/examples/minimal-agent</module>
+        <module>ai-agent-java-sdk-core/examples/streaming-agent</module>
+        <module>ai-agent-java-sdk-core/examples/tool-agent</module>
     </modules>
 
     <properties>
