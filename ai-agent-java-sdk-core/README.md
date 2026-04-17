@@ -1,5 +1,7 @@
 # AI Agent Java SDK (`ai-agent-java-sdk-core`)
 
+> We don’t replace Spring AI or AgentCore; we give a strict, testable execution loop and governance for tool-calling agents on the JVM.
+
 **AI Agent Java SDK** provides **model-driven** agent execution for [Spring AI](https://spring.io/projects/spring-ai) and the [spring-ai-agentcore](https://github.com/spring-ai-community/spring-ai-agentcore) ecosystem. The design is **inspired by the mental model of the [AWS Strands Agents Python SDK](https://strandsagents.com/)** (and related Python/TypeScript materials): the foundation model plans, chooses tools, and iterates until it produces a final answer, instead of the application hard-coding workflows or DAGs. This project is **independent** and is **not** the official “Strands for Java” product.
 
 ---
