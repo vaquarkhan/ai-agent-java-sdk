@@ -16,6 +16,6 @@ From the repository root:
 
 ```bash
 mvn -DskipTests install
-cd ai-agent-java-sdk-core/examples/<example-dir>
+cd examples/<example-dir>
 mvn spring-boot:run
 ```

@@ -169,7 +169,7 @@ ai:
 
 ## Further reading
 
-- [Examples (quickstart and more)](examples/README.md)
+- [Examples (quickstart and more)](../examples/README.md)
 - [Python Strands vs AI Agent Java SDK (side-by-side)](docs/python-strands-vs-ai-agent-java.md)
 - [Tutorial (step-by-step)](docs/tutorial.md) - tools, MCP, streaming, production tuning
 - [Developer guide (reference)](docs/developer-guide.md) - architecture, configuration matrix, observability

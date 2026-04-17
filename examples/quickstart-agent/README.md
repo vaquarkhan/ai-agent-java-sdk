@@ -25,7 +25,7 @@ For a **real** foundation model, replace that bean with a `LoopModelClient` impl
 From the repository root (after installing the SDK module locally if needed):
 
 ```bash
-cd ai-agent-java-sdk-core/examples/quickstart-agent
+cd examples/quickstart-agent
 mvn spring-boot:run
 ```
 
