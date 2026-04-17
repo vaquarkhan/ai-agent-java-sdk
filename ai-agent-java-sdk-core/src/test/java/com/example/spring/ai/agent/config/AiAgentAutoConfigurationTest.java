@@ -7,16 +7,19 @@ import com.example.spring.ai.agent.AiAgent;
 import com.example.spring.ai.agent.execution.ExecutionMessage;
 import com.example.spring.ai.agent.execution.LoopModelClient;
 import com.example.spring.ai.agent.execution.ModelTurnResponse;
+import com.example.spring.ai.agent.execution.ChatModelLoopModelClient;
 import com.example.spring.ai.agent.execution.NoopLoopModelClient;
 import com.example.spring.ai.agent.execution.stream.StreamEvent;
 import java.util.List;
 import org.junit.jupiter.api.Test;
+import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.autoconfigure.validation.ValidationAutoConfiguration;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import reactor.core.publisher.Flux;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
 
 class AiAgentAutoConfigurationTest {
 
@@ -36,6 +39,16 @@ class AiAgentAutoConfigurationTest {
                 .withPropertyValues(
                         "ai.agent.enabled=false", "ai.agent.model-provider=openai", "ai.agent.model-id=gpt")
                 .run(context -> assertThat(context).doesNotHaveBean(AiAgent.class));
+    }
+
+    @Test
+    void chatModelBeanYieldsChatModelLoopModelClient() {
+        ChatModel stubModel = mock(ChatModel.class);
+        contextRunner
+                .withBean(ChatModel.class, () -> stubModel)
+                .withPropertyValues("ai.agent.model-provider=openai", "ai.agent.model-id=gpt")
+                .run(context ->
+                        assertThat(context.getBean(LoopModelClient.class)).isInstanceOf(ChatModelLoopModelClient.class));
     }
 
     @Test
