@@ -1,5 +1,7 @@
 # AI Agent Java SDK
 
+> We don’t replace Spring AI or AgentCore; we give a strict, testable execution loop and governance for tool-calling agents on the JVM.
+
 Single Maven reactor: build everything from the repository root (no git submodules).
 
 ## Build
