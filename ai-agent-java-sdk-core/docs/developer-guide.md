@@ -106,7 +106,7 @@ Validation is enforced by **`AiAgentProperties`** (Jakarta Validation) and **`Ai
 
 ## Auto-configuration
 
-**`AiAgentAutoConfiguration`** (package `com.example.spring.ai.agent.config`) registers:
+**`AiAgentAutoConfiguration`** (package `io.github.vaquarkhan.agent.config`) registers:
 
 - **`ToolRegistry`** via **`ToolBridge.discoverTools`**
 - **`LoopModelClient`** defaulting to **`NoopLoopModelClient`** (`@ConditionalOnMissingBean`)

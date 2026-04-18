@@ -108,7 +108,7 @@ Add the module (coordinates match your parent `groupId` / `version`):
 
 ```xml
 <dependency>
-    <groupId>com.example.spring.ai</groupId>
+    <groupId>io.github.vaquarkhan</groupId>
     <artifactId>ai-agent-java-sdk-core</artifactId>
     <version>0.1.0-SNAPSHOT</version>
 </dependency>
@@ -151,12 +151,12 @@ ai:
 
 ## Primary Java types
 
-- `com.example.spring.ai.agent.AiAgent` - entry point
-- `com.example.spring.ai.agent.config.AiAgentProperties` - `ai.agent.*` binding
-- `com.example.spring.ai.agent.execution.AgentExecutionLoop` - core loop
-- `com.example.spring.ai.agent.tool.ToolBridge` / `ToolRegistry` - tool discovery and execution
-- `com.example.spring.ai.agent.observability.AgentObservability` - traces and metrics
-- `com.example.spring.ai.agent.api.Advisor` - optional prompt enrichment (e.g. memory advisors from AgentCore)
+- `io.github.vaquarkhan.agent.AiAgent` - entry point
+- `io.github.vaquarkhan.agent.config.AiAgentProperties` - `ai.agent.*` binding
+- `io.github.vaquarkhan.agent.execution.AgentExecutionLoop` - core loop
+- `io.github.vaquarkhan.agent.tool.ToolBridge` / `ToolRegistry` - tool discovery and execution
+- `io.github.vaquarkhan.agent.observability.AgentObservability` - traces and metrics
+- `io.github.vaquarkhan.agent.api.Advisor` - optional prompt enrichment (e.g. memory advisors from AgentCore)
 
 ---
 
