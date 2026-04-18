@@ -1,3 +1,14 @@
+<div align="center">
+  <div>
+    <a href="https://github.com/vaquarkhan/ai-agent-java-sdk/edit/main/README.md">
+      <img src="https://github.com/vaquarkhan/ai-agent-java-sdk/blob/main/images/java-ai-agent-sdk.png" alt="AI Agent Java SDK" width="55px" height="105px">
+    </a>
+  </div>
+
+  <h1>
+    AI Agent Java SDK
+  </h1>
+
 # AI Agent Java SDK
 Here is the full README write-up in raw markdown format so you can easily copy and paste it into your repository:
 
