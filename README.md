@@ -5,7 +5,7 @@
 
 Spring AI provides an exceptional, generalized application framework for Java developers, offering unified APIs across major model providers like OpenAI, Anthropic, and Amazon Bedrock. It excels at bringing standard Spring Boot paradigms-like dependency injection and POJO mapping-into the AI ecosystem. 
 
-However, as organizations transition to autonomous, multi-agent workflows in highly regulated production environments, they often require strict cloud-native optimizations and rigorous security guardrails. Our SDK (`ai-agent-java-sdk`) does not replace Spring AI; rather, it acts as a hyper-specialized enterprise extension. It natively bridges Java applications with powerful AWS infrastructure (like Amazon Bedrock AgentCore) and introduces zero-trust governance layers like MCP-Bastion and AIV-Integrity-Gate.
+However, as organizations transition to autonomous, multi-agent workflows in highly regulated production environments, they often require strict cloud-native optimizations and rigorous security guardrails. Our SDK (`ai-agent-java-sdk`) does not replace Spring AI; rather, it acts as a hyper-specialized enterprise extension. It natively bridges Java applications with powerful AWS infrastructure (like Amazon Bedrock AgentCore) and introduces zero-trust governance layers.
 
 ### ⚙️ Seamless Integration: Powered Internally by Spring AI AgentCore
 
