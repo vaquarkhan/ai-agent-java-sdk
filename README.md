@@ -1,6 +1,5 @@
 # AI Agent Java SDK
 
-Here is the full README write-up enclosed in a raw Markdown code block so you can easily copy and paste the exact syntax directly into your file:
 
 ###  Spring AI & `ai-agent-java-sdk`: A Complementary Enterprise Architecture
 
