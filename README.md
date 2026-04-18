@@ -3,7 +3,7 @@ Here is the full README write-up in raw markdown format so you can easily copy a
 
 ###  Spring AI & `ai-agent-java-sdk`: A Complementary Enterprise Architecture
 
-Spring AI provides an exceptional, generalized application framework for Java developers, offering unified APIs across major model providers like OpenAI, Anthropic, and Amazon Bedrock. It excels at bringing standard Spring Boot paradigms—like dependency injection and POJO mapping—into the AI ecosystem. 
+Spring AI provides an exceptional, generalized application framework for Java developers, offering unified APIs across major model providers like OpenAI, Anthropic, and Amazon Bedrock. It excels at bringing standard Spring Boot paradigms-like dependency injection and POJO mapping-into the AI ecosystem. 
 
 However, as organizations transition to autonomous, multi-agent workflows in highly regulated production environments, they often require strict cloud-native optimizations and rigorous security guardrails. Our SDK (`ai-agent-java-sdk` ) does not replace Spring AI; rather, it acts as a hyper-specialized enterprise extension. It natively bridges Java applications with powerful AWS infrastructure (like Amazon Bedrock AgentCore) and introduces zero-trust governance layers for MCP security and automated code integrity validation.
 
@@ -11,7 +11,7 @@ However, as organizations transition to autonomous, multi-agent workflows in hig
 
 It is important to note that this SDK does not seek to replace the foundational AgentCore integration. Instead, it works seamlessly with it. Internally, the `ai-agent-java-sdk` is built directly on top of the **Spring AI AgentCore** library, utilizing it for deep alignment and integration. 
 
-By importing the `spring-ai-agentcore-bom` dependency, our SDK natively inherits and utilizes all core Amazon Bedrock AgentCore capabilities—such as fully managed serverless agent runtimes, secure code interpreters, and browser automation tools. What makes this SDK unique is that it wraps these native Spring AI AgentCore components in a model-driven execution loop, adding strict, testable enterprise governance, session management, and robust security layers.
+By importing the `spring-ai-agentcore-bom` dependency, our SDK natively inherits and utilizes all core Amazon Bedrock AgentCore capabilities-such as fully managed serverless agent runtimes, secure code interpreters, and browser automation tools. What makes this SDK unique is that it wraps these native Spring AI AgentCore components in a model-driven execution loop, adding strict, testable enterprise governance, session management, and robust security layers.
 
 ###  Side-by-Side Comparison
 
