@@ -1,17 +1,17 @@
 # AI Agent Java SDK
-
+Here is the full README write-up in raw markdown format so you can easily copy and paste it into your repository:
 
 ###  Spring AI & `ai-agent-java-sdk`: A Complementary Enterprise Architecture
 
-Spring AI provides an exceptional, generalized application framework for Java developers, offering unified APIs across major model providers like OpenAI, Anthropic, and Amazon Bedrock. It excels at bringing standard Spring Boot paradigms-like dependency injection and POJO mapping-into the AI ecosystem. 
+Spring AI provides an exceptional, generalized application framework for Java developers, offering unified APIs across major model providers like OpenAI, Anthropic, and Amazon Bedrock. It excels at bringing standard Spring Boot paradigms—like dependency injection and POJO mapping—into the AI ecosystem. 
 
-However, as organizations transition to autonomous, multi-agent workflows in highly regulated production environments, they often require strict cloud-native optimizations and rigorous security guardrails. Our SDK (`ai-agent-java-sdk`) does not replace Spring AI; rather, it acts as a hyper-specialized enterprise extension. It natively bridges Java applications with powerful AWS infrastructure (like Amazon Bedrock AgentCore) and introduces zero-trust governance layers.
+However, as organizations transition to autonomous, multi-agent workflows in highly regulated production environments, they often require strict cloud-native optimizations and rigorous security guardrails. Our SDK (`ai-agent-java-sdk` / `spring-ai-strands-agentcore-sdk`) does not replace Spring AI; rather, it acts as a hyper-specialized enterprise extension. It natively bridges Java applications with powerful AWS infrastructure (like Amazon Bedrock AgentCore) and introduces zero-trust governance layers for MCP security and automated code integrity validation.
 
-### ⚙️ Seamless Integration: Powered Internally by Spring AI AgentCore
+###  Seamless Integration: Powered Internally by Spring AI AgentCore
 
 It is important to note that this SDK does not seek to replace the foundational AgentCore integration. Instead, it works seamlessly with it. Internally, the `ai-agent-java-sdk` is built directly on top of the **Spring AI AgentCore** library, utilizing it for deep alignment and integration. 
 
-By importing the `spring-ai-agentcore-bom` dependency, our SDK natively inherits and utilizes all core Amazon Bedrock AgentCore capabilities-such as fully managed serverless agent runtimes, secure code interpreters, and browser automation tools. What makes this SDK unique is that it wraps these native Spring AI AgentCore components in a model-driven execution loop, adding strict, testable enterprise governance, session management, and robust security layers.
+By importing the `spring-ai-agentcore-bom` dependency, our SDK natively inherits and utilizes all core Amazon Bedrock AgentCore capabilities—such as fully managed serverless agent runtimes, secure code interpreters, and browser automation tools. What makes this SDK unique is that it wraps these native Spring AI AgentCore components in a model-driven execution loop, adding strict, testable enterprise governance, session management, and robust security layers.
 
 ###  Side-by-Side Comparison
 
@@ -20,8 +20,24 @@ By importing the `spring-ai-agentcore-bom` dependency, our SDK natively inherits
 | **Primary Architecture** | General-purpose framework designed for model portability across diverse LLM providers. | Specialized, cloud-native extension focused on enterprise governance and high-performance execution. |
 | **Agent Orchestration** | Relies on developer-defined, prescriptive patterns like Chain, Routing, and Orchestrator-Workers. | Leverages a model-driven approach where the LLM autonomously handles planning, chaining, and tool usage. |
 | **Cloud Integration** | Abstracted, generic vector store and model integrations. | Natively optimized for Amazon Bedrock AgentCore, enabling serverless agent runtimes, secure code interpreters, and browser automation. |
-| **MCP Security Governance** | Standard MCP tool execution; developers must build their own security layers. | Includes **MCP-Bastion**, providing <5ms local protection against prompt injections, PII leakage, infinite loops, and token budget overruns. |
-| **Generated Code Integrity** | Maps structured model outputs directly into POJOs. | Includes **AIV-Integrity-Gate**, which actively validates generated imports against `pom.xml` and enforces strict YAML architectural design rules to prevent supply-chain risks. |
+| **MCP Security Governance** | Standard MCP tool execution; developers must build their own security layers. | Includes built-in, local protection (<5ms overhead) against prompt injections, PII leakage, infinite loops, and token budget overruns without relying on external middleware. |
+| **Generated Code Integrity** | Maps structured model outputs directly into POJOs. | Features automated integrity validation that actively checks generated imports against `pom.xml` and enforces strict YAML architectural design rules to prevent supply-chain risks. |
+
+###  Deep Dive: Architectural & Technical Comparison
+
+To truly understand the value of this SDK, we must look at exactly how agents are constructed at the framework level:
+
+**1. The Core Abstraction: `ChatClient` vs. First-Class `AiAgent`**
+*   **The Spring AI Approach:** Core Spring AI does not currently utilize a dedicated, first-class `Agent` object. Instead, an "agent" is conceptually built by attaching specific interceptors (called "Advisors," such as `PromptChatMemoryAdvisor`) to a standard `ChatClient`.
+*   **Our SDK's Value:** This SDK introduces a dedicated `AiAgent` class backed by the `ChatModelLoopModelClient`. By elevating the agent to a first-class citizen rather than just an intercepted chat client, the SDK can natively manage complex, multi-agent states and wrap the underlying Spring AI abstractions into a strict, testable execution loop.
+
+**2. The Execution Mechanism: Recursive Advisors vs. Model-Driven Loops**
+*   **The Spring AI Approach:** To handle multi-step reasoning and tool calling, Spring AI relies on "Recursive Advisors" (specifically the `ToolCallAdvisor`). This advisor intercepts tool requests and forcefully loops the downstream advisor chain. However, this approach can be highly susceptible to infinite loops if a tool returns descriptive text instead of a strict format (a known issue where the LLM repeats the same empty parameters endlessly).
+*   **Our SDK's Value:** Instead of hijacking an HTTP-style interceptor chain with recursion, our SDK features a true **Model-Driven Execution Loop** built from the ground up for autonomous reasoning. Crucially, it includes built-in infinite loop protection and strict token budget enforcement at the loop level, preventing the runaway API costs that can occur in standard recursive advisor chains.
+
+**3. Enterprise Governance and Security**
+*   **The Spring AI Approach:** Spring AI provides the foundational capability to call external APIs, but implementing zero-trust security guardrails is left entirely to the developer to build via custom advisors.
+*   **Our SDK's Value:** Our SDK integrates zero-trust governance directly into the agent loop. It executes 100% locally with `<5ms` overhead, natively featuring prompt injection defense (via Meta PromptGuard), real-time PII redaction (via Microsoft Presidio), and automated code integrity validation to prevent supply-chain vulnerabilities.
 
 ###  Inspired by AWS Strands Agents: The Model-Driven Advantage
 
@@ -40,6 +56,7 @@ Our SDK adopts the **model-driven approach** championed by Strands. Instead of d
 Use **Spring AI** as your foundational layer to easily connect your enterprise data and build standard RAG or conversational applications. 
 
 Add the **`ai-agent-java-sdk`** toolkit when you need to deploy autonomous, model-driven agents into mission-critical environments where strict token budgeting, PII redaction, automated dependency validation, and dynamic, on-the-fly task planning are absolute requirements.
+
 
 ## Build
 
