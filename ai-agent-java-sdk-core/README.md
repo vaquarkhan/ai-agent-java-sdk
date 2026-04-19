@@ -151,12 +151,12 @@ ai:
 
 ## Primary Java types
 
-- `io.github.vaquarkhan.agent.AiAgent` - entry point
-- `io.github.vaquarkhan.agent.config.AiAgentProperties` - `ai.agent.*` binding
-- `io.github.vaquarkhan.agent.execution.AgentExecutionLoop` - core loop
-- `io.github.vaquarkhan.agent.tool.ToolBridge` / `ToolRegistry` - tool discovery and execution
-- `io.github.vaquarkhan.agent.observability.AgentObservability` - traces and metrics
-- `io.github.vaquarkhan.agent.api.Advisor` - optional prompt enrichment (e.g. memory advisors from AgentCore)
+- `io.github.vaquarkhan.strands.AiAgent` - entry point
+- `io.github.vaquarkhan.strands.config.AiAgentProperties` - `ai.agent.*` binding
+- `io.github.vaquarkhan.strands.execution.AgentExecutionLoop` - core loop
+- `io.github.vaquarkhan.strands.tool.ToolBridge` / `ToolRegistry` - tool discovery and execution
+- `io.github.vaquarkhan.strands.observability.AgentObservability` - traces and metrics
+- `io.github.vaquarkhan.strands.api.Advisor` - optional prompt enrichment (e.g. memory advisors from AgentCore)
 
 ---
 
