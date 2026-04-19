@@ -22,12 +22,15 @@ For a **real** foundation model, replace that bean with a `LoopModelClient` impl
 
 ## Run
 
-From the repository root (after installing the SDK module locally if needed):
+From the **repository root**, install the SDK into your local Maven repository, then start this sample:
 
 ```bash
+mvn clean install
 cd examples/quickstart-agent
 mvn spring-boot:run
 ```
+
+If you already published or installed `ai-agent-java-sdk-core` elsewhere, you can omit the first line and run from `examples/quickstart-agent` only.
 
 Then:
 

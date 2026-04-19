@@ -12,10 +12,16 @@
 
 All samples use a **scripted** `LoopModelClient` where noted so you can run them **without** cloud LLM keys; swap in a `ChatClient`-backed client for real model-driven behavior.
 
-From the repository root:
+From the repository root, install the SDK jars, then run an example:
 
 ```bash
 mvn -DskipTests install
 cd examples/<example-dir>
 mvn spring-boot:run
+```
+
+To compile **all** example modules at once (after `mvn install` at the root):
+
+```bash
+mvn -f examples/pom.xml -DskipTests package
 ```

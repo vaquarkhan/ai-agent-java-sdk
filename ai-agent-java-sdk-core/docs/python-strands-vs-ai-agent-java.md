@@ -2,7 +2,7 @@
 
 _Author: Vaquar Khan_
 
-The [AWS Strands Agents Python SDK](https://github.com/strands-agents/sdk-python) ships first-class support for **Python** and **TypeScript**. This repository's **AI Agent Java SDK** (`ai-agent-java-sdk-core`) implements a **model-driven** pattern on the JVM **inspired by** that mental model: model plus tools in a loop until a final answer, integrated with **Spring Boot** and **Spring AI**. This is an **independent** Java library—not an official AWS Strands product.
+The [AWS Strands Agents Python SDK](https://github.com/strands-agents/sdk-python) ships first-class support for **Python** and **TypeScript**. This repository's **AI Agent Java SDK** (`ai-agent-java-sdk-core`) implements a **model-driven** pattern on the JVM **inspired by** that mental model: model plus tools in a loop until a final answer, integrated with **Spring Boot** and **Spring AI**. This is an **independent** Java library - not an official AWS Strands product.
 
 ---
 

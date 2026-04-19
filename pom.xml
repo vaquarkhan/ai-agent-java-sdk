@@ -10,20 +10,14 @@
     <packaging>pom</packaging>
     <name>AI Agent Java SDK</name>
     <description>
-        Single-root Maven reactor: core library, optional DynamoDB session extension, and runnable examples.
+        Parent POM: core library and optional DynamoDB session extension.
+        Runnable samples live under examples/ and are built separately (see examples/README.md).
         Spring AI + optional Spring AI AgentCore BOM alignment (no git submodules; dependencies resolve from Maven Central).
     </description>
 
     <modules>
         <module>ai-agent-java-sdk-core</module>
         <module>ai-agent-java-sdk-dynamodb-session-manager</module>
-        <module>examples/quickstart-agent</module>
-        <module>examples/calculator-minimal-agent</module>
-        <module>examples/streaming-sse-agent</module>
-        <module>examples/tool-discovery-filter-agent</module>
-        <module>examples/minimal-agent</module>
-        <module>examples/streaming-agent</module>
-        <module>examples/tool-agent</module>
     </modules>
 
     <properties>

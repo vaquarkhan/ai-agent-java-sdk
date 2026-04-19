@@ -43,6 +43,13 @@ For architecture details and property reference, see [developer-guide.md](develo
 - Maven or Gradle build tool
 - AWS credentials configured if using Amazon Bedrock (environment variables, `~/.aws/credentials`, or IAM roles)
 
+### Building this repository (SDK vs examples)
+
+If you are working from a **clone of the monorepo** (not only consuming the JAR from Maven Central):
+
+- From the **repository root**, `mvn clean install` builds and installs **`ai-agent-java-sdk-core`** and **`ai-agent-java-sdk-dynamodb-session-manager`** only. The root reactor does **not** include the `examples/` tree.
+- **Runnable samples** live under `examples/`. After a root `mvn install`, either build them all with `mvn -f examples/pom.xml package` or `cd` into one sample (for example `examples/quickstart-agent`) and run `mvn spring-boot:run`. See the top-level [examples/README.md](../../examples/README.md).
+
 ---
 
 ## Part 1: Getting Started
@@ -2330,7 +2337,7 @@ System.out.println("Iterations: " + trace.iterations().size());
 
 ## Next Steps
 
-- Run the examples under [examples/README.md](../examples/README.md): **quickstart-agent**, **calculator-minimal-agent**, **streaming-sse-agent**, **tool-discovery-filter-agent**
+- Run the samples listed in [examples/README.md](../../examples/README.md) (**quickstart-agent**, **calculator-minimal-agent**, **streaming-sse-agent**, **tool-discovery-filter-agent**, and others). From the repo root: `mvn install`, then `mvn -f examples/pom.xml package` or `cd examples/<sample>` and `mvn spring-boot:run`.
 - Read [developer-guide.md](developer-guide.md) for the full configuration matrix and observability reference
 - Implement a real `LoopModelClient` for your Spring AI chat model (Bedrock, OpenAI, Ollama, etc.)
 - Set up Micrometer dashboards to monitor `ai.agent.iteration.count`, `ai.agent.loop.duration`, and `ai.agent.tool.invocations`

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>io.github.vaquarkhan</groupId>
+        <artifactId>ai-agent-java-sdk</artifactId>
+        <version>0.1.0-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>ai-agent-java-sdk-examples</artifactId>
+    <packaging>pom</packaging>
+    <name>AI Agent Java SDK - examples (optional)</name>
+    <description>
+        Runnable Spring Boot samples; not part of the default root reactor.
+        Install the SDK from the repository root first, then build here.
+    </description>
+
+    <modules>
+        <module>quickstart-agent</module>
+        <module>calculator-minimal-agent</module>
+        <module>streaming-sse-agent</module>
+        <module>tool-discovery-filter-agent</module>
+        <module>minimal-agent</module>
+        <module>streaming-agent</module>
+        <module>tool-agent</module>
+    </modules>
+</project>

@@ -2,12 +2,22 @@
 
 > We don’t replace Spring AI or AgentCore; we give a strict, testable execution loop and governance for tool-calling agents on the JVM.
 
-Single Maven reactor: build everything from the repository root (no git submodules).
+The root reactor builds **only** the SDK modules. Sample apps under `examples/` are optional and use a [separate aggregator POM](examples/pom.xml).
 
-## Build
+## Build (SDK)
 
 ```bash
 mvn clean install
+```
+
+## Build (examples, optional)
+
+Install the SDK first, then either build all examples or one module:
+
+```bash
+mvn clean install
+mvn -f examples/pom.xml -DskipTests package
+# or: cd examples/quickstart-agent && mvn package
 ```
 
 ## Layout
