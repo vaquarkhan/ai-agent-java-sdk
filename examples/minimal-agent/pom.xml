@@ -7,7 +7,7 @@
     <parent>
         <groupId>io.github.vaquarkhan</groupId>
         <artifactId>ai-agent-java-sdk</artifactId>
-        <version>0.1.0-SNAPSHOT</version>
+        <version>0.1.0</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
 

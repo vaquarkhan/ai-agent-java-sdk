@@ -110,7 +110,7 @@ Add the module (coordinates match your parent `groupId` / `version`):
 <dependency>
     <groupId>io.github.vaquarkhan</groupId>
     <artifactId>ai-agent-java-sdk-core</artifactId>
-    <version>0.1.0-SNAPSHOT</version>
+    <version>0.1.0</version>
 </dependency>
 ```
 
@@ -206,4 +206,4 @@ For the detailed side-by-side comparison, see [python-strands-vs-ai-agent-java.m
 
 ## License
 
-Follow the license of the enclosing project / repository this artifact ships with.
+Apache License 2.0 — see the repository [LICENSE](../LICENSE).

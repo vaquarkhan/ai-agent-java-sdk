@@ -1,0 +1,76 @@
+name: Publish to Maven Central
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Run mvn verify + sign only (no upload)"
+        type: boolean
+        default: false
+      auto_publish:
+        description: "Auto-publish validated bundle on Central Portal"
+        type: boolean
+        default: true
+  push:
+    tags:
+      - "v*.*.*"
+
+concurrency:
+  group: maven-central-publish
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          java-version: "17"
+          distribution: "temurin"
+          cache: "maven"
+          server-id: central
+          server-username: ${{ secrets.CENTRAL_PORTAL_USERNAME }}
+          server-password: ${{ secrets.CENTRAL_PORTAL_PASSWORD }}
+
+      - uses: crazy-max/ghaction-import-gpg@v6
+        with:
+          gpg_private_key: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}
+          passphrase: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
+
+      - name: Publish flags
+        id: flags
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          INPUT_AUTO: ${{ github.event.inputs.auto_publish }}
+        run: |
+          if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+            echo "auto=${INPUT_AUTO:-true}" >> "$GITHUB_OUTPUT"
+          else
+            echo "auto=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Maven verify (dry run)
+        if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.dry_run == 'true' }}
+        env:
+          GPG_PASSPHRASE: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
+        run: mvn -B clean verify -Pcentral-publish -Dgpg.passphrase="${GPG_PASSPHRASE}"
+
+      - name: Maven deploy
+        if: ${{ github.event_name != 'workflow_dispatch' || github.event.inputs.dry_run != 'true' }}
+        env:
+          GPG_PASSPHRASE: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
+        run: |
+          WAIT="validated"
+          if [ "${{ steps.flags.outputs.auto }}" = "true" ]; then
+            WAIT="published"
+          fi
+          mvn -B clean deploy -Pcentral-publish \
+            -Dgpg.passphrase="${GPG_PASSPHRASE}" \
+            -Dcentral.autoPublish="${{ steps.flags.outputs.auto }}" \
+            -Dcentral.waitUntil="${WAIT}"

@@ -104,7 +104,15 @@ Add optional AgentCore modules in your app using the same BOM version property `
 
 See [ai-agent-java-sdk-core/README.md](ai-agent-java-sdk-core/README.md) and [examples/README.md](examples/README.md).
 
-📚 Getting Started & Tutorials
-Ready to see it in action? Check out our step-by-step documentation to start building model-driven, enterprise-grade AI agents today:
+### Getting started and tutorials
 
-(https://github.com/vaquarkhan/ai-agent-java-sdk/blob/main/ai-agent-java-sdk-core/docs/tutorial.md)
+- [Comprehensive tutorial](ai-agent-java-sdk-core/docs/tutorial.md)
+- [Quick start tutorial](ai-agent-java-sdk-core/docs/quick-start-tutorial.md)
+
+## Maven Central publishing
+
+Artifacts: **`io.github.vaquarkhan`** (release version **0.1.0** in this branch). Maintainer steps and CI secrets are in [docs/publishing.md](docs/publishing.md). Workflow: [.github/workflows/maven-publish.yml](.github/workflows/maven-publish.yml). After configuring secrets on GitHub, run **Actions → Publish to Maven Central**, or push a tag like **`v0.1.0`**.
+
+## License
+
+Apache License 2.0 — see [LICENSE](LICENSE).
