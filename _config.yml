@@ -1,0 +1,11 @@
+include:
+  - assets
+  - index.html
+  - .nojekyll
+
+exclude:
+  - spring-ai-strands-agentcore-sdk
+  - .kiro
+  - .github
+  - pom.xml
+  - README.md
