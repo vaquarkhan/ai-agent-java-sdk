@@ -33,14 +33,13 @@ Use a **release** `<version>` in the root `pom.xml` (e.g. `0.1.0`) before publis
 
 ## Troubleshooting (GitHub Actions)
 
-**`Input required and not supplied: gpg_private_key`** (from `crazy-max/ghaction-import-gpg`)
+**`Input required and not supplied: gpg_private_key`** (older workflows used `ghaction-import-gpg`; current workflow uses **`gpg --import`** instead.)
 
-- Create the secret **`MAVEN_GPG_PRIVATE_KEY`** on the repository: **Settings → Secrets and variables → Actions → New repository secret**.
-- Paste the **entire** armored private key, including the header/footer lines:
-  - `-----BEGIN PGP PRIVATE KEY BLOCK-----`
-  - `-----END PGP PRIVATE KEY BLOCK-----`
-- Also set **`MAVEN_GPG_PASSPHRASE`** (can be empty string if the key has no passphrase—still create the secret if the action requires it).
-- Export the armored key locally with: `gpg --armor --export-secret-keys KEY_ID`
+If the job still fails at **Verify required secrets** or **Import GPG key**:
+
+- Add **`MAVEN_GPG_PRIVATE_KEY`** *or* **`GPG_PRIVATE_KEY`** (exact names) under **Settings → Secrets and variables → Actions** on the **same repository** that runs the workflow (not only on your fork profile).
+- Use the **armored** export (must contain `BEGIN PGP PRIVATE KEY BLOCK`): `gpg --armor --export-secret-keys KEY_ID`
+- Set **`MAVEN_GPG_PASSPHRASE`** or **`GPG_PASSPHRASE`** if your key has a passphrase (both can be empty if the key truly has none).
 
 **Deploy fails with Central / 401**
 
