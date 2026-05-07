@@ -28,6 +28,36 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Fails fast with a clear message if secrets are missing (avoids cryptic ghaction-import-gpg errors).
+      - name: Verify required secrets
+        shell: bash
+        env:
+          MAVEN_GPG_PRIVATE_KEY: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}
+          MAVEN_GPG_PASSPHRASE: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
+          CENTRAL_USER: ${{ secrets.CENTRAL_PORTAL_USERNAME }}
+          CENTRAL_PASS: ${{ secrets.CENTRAL_PORTAL_PASSWORD }}
+        run: |
+          err=0
+          if [ -z "$MAVEN_GPG_PRIVATE_KEY" ]; then
+            echo "::error::Missing repository secret MAVEN_GPG_PRIVATE_KEY. Add the full armored GPG private key (starts with -----BEGIN PGP PRIVATE KEY BLOCK-----). See docs/publishing.md"
+            err=1
+          fi
+          if [ -z "$MAVEN_GPG_PASSPHRASE" ]; then
+            echo "::error::Missing repository secret MAVEN_GPG_PASSPHRASE"
+            err=1
+          fi
+          deploy="1"
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
+            deploy="0"
+          fi
+          if [ "$deploy" = "1" ]; then
+            if [ -z "$CENTRAL_USER" ] || [ -z "$CENTRAL_PASS" ]; then
+              echo "::error::Missing CENTRAL_PORTAL_USERNAME or CENTRAL_PORTAL_PASSWORD (required for mvn deploy to Central)"
+              err=1
+            fi
+          fi
+          exit "$err"
+
       - uses: actions/setup-java@v4
         with:
           java-version: "17"
