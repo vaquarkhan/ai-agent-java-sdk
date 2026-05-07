@@ -16,8 +16,12 @@ Use the [Central Publisher Portal](https://central.sonatype.com/) and [`central-
 |--------|---------|
 | `CENTRAL_PORTAL_USERNAME` | Portal token username |
 | `CENTRAL_PORTAL_PASSWORD` | Portal token password |
-| `MAVEN_GPG_PRIVATE_KEY` | Armored GPG private key |
-| `MAVEN_GPG_PASSPHRASE` | Key passphrase |
+| `MAVEN_GPG_PRIVATE_KEY` | Armored GPG private key (recommended name) |
+| `GPG_PRIVATE_KEY` | **Alias** — same value if you already use this name elsewhere |
+| `MAVEN_GPG_PASSPHRASE` | Key passphrase (omit or leave empty only if your key has no passphrase) |
+| `GPG_PASSPHRASE` | **Alias** for the passphrase |
+
+The workflow imports the key with **`gpg --import`** (no third-party action). If **`crazy-max/ghaction-import-gpg`** was failing with **`gpg_private_key`**, the usual cause was a missing or wrongly named repository secret pull.
 
 ## Workflow
 

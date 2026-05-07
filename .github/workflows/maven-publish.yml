@@ -28,31 +28,36 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # Fails fast with a clear message if secrets are missing (avoids cryptic ghaction-import-gpg errors).
+      # Prefer MAVEN_* names; fallback to generic GPG_* if you named secrets differently.
       - name: Verify required secrets
         shell: bash
         env:
           MAVEN_GPG_PRIVATE_KEY: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}
-          MAVEN_GPG_PASSPHRASE: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
+          GPG_PRIVATE_KEY_ALT: ${{ secrets.GPG_PRIVATE_KEY }}
           CENTRAL_USER: ${{ secrets.CENTRAL_PORTAL_USERNAME }}
           CENTRAL_PASS: ${{ secrets.CENTRAL_PORTAL_PASSWORD }}
         run: |
+          KEY="$MAVEN_GPG_PRIVATE_KEY"
+          if [ -z "$KEY" ]; then KEY="$GPG_PRIVATE_KEY_ALT"; fi
           err=0
-          if [ -z "$MAVEN_GPG_PRIVATE_KEY" ]; then
-            echo "::error::Missing repository secret MAVEN_GPG_PRIVATE_KEY. Add the full armored GPG private key (starts with -----BEGIN PGP PRIVATE KEY BLOCK-----). See docs/publishing.md"
+          if [ -z "$KEY" ]; then
+            echo "::error::No GPG private key secret found. Create one repository secret:"
+            echo "::error::- MAVEN_GPG_PRIVATE_KEY (recommended), OR"
+            echo "::error::- GPG_PRIVATE_KEY (alias)"
+            echo "::error::Value = full armored key including BEGIN/END lines. docs/publishing.md"
+            err=1
+          elif ! echo "$KEY" | grep -q "BEGIN PGP PRIVATE KEY BLOCK"; then
+            echo "::error::GPG secret must be ARMORED (must contain BEGIN PGP PRIVATE KEY BLOCK). If you have binary .gpg only, export: gpg --armor --export-secret-keys KEY_ID"
             err=1
           fi
-          if [ -z "$MAVEN_GPG_PASSPHRASE" ]; then
-            echo "::error::Missing repository secret MAVEN_GPG_PASSPHRASE"
-            err=1
-          fi
+
           deploy="1"
           if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
             deploy="0"
           fi
           if [ "$deploy" = "1" ]; then
             if [ -z "$CENTRAL_USER" ] || [ -z "$CENTRAL_PASS" ]; then
-              echo "::error::Missing CENTRAL_PORTAL_USERNAME or CENTRAL_PORTAL_PASSWORD (required for mvn deploy to Central)"
+              echo "::error::Missing CENTRAL_PORTAL_USERNAME or CENTRAL_PORTAL_PASSWORD (required for mvn deploy)"
               err=1
             fi
           fi
@@ -67,10 +72,23 @@ jobs:
           server-username: ${{ secrets.CENTRAL_PORTAL_USERNAME }}
           server-password: ${{ secrets.CENTRAL_PORTAL_PASSWORD }}
 
-      - uses: crazy-max/ghaction-import-gpg@v6
-        with:
-          gpg_private_key: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}
-          passphrase: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
+      # Native import avoids ghaction-import-gpg "gpg_private_key" quirks with empty/expansion.
+      - name: Import GPG key (headless)
+        shell: bash
+        env:
+          MAVEN_GPG_PRIVATE_KEY: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}
+          GPG_PRIVATE_KEY_ALT: ${{ secrets.GPG_PRIVATE_KEY }}
+        run: |
+          set -euo pipefail
+          KEY="$MAVEN_GPG_PRIVATE_KEY"
+          if [ -z "$KEY" ]; then KEY="$GPG_PRIVATE_KEY_ALT"; fi
+          mkdir -p ~/.gnupg
+          chmod 700 ~/.gnupg
+          printf '%s\n' "pinentry-mode loopback" >> ~/.gnupg/gpg.conf
+          printf '%s\n' "allow-loopback-pinentry" >> ~/.gnupg/gpg-agent.conf
+          gpgconf --kill gpg-agent 2>/dev/null || true
+          echo "$KEY" | gpg --batch --import --no-tty
+          gpg --list-secret-keys --keyid-format LONG
 
       - name: Publish flags
         id: flags
@@ -88,19 +106,24 @@ jobs:
       - name: Maven verify (dry run)
         if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.dry_run == 'true' }}
         env:
-          GPG_PASSPHRASE: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
-        run: mvn -B clean verify -Pcentral-publish -Dgpg.passphrase="${GPG_PASSPHRASE}"
+          PW1: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
+          PW2: ${{ secrets.GPG_PASSPHRASE }}
+        run: |
+          GPG_PW="${PW1:-$PW2}"
+          mvn -B clean verify -Pcentral-publish -Dgpg.passphrase="${GPG_PW}"
 
       - name: Maven deploy
         if: ${{ github.event_name != 'workflow_dispatch' || github.event.inputs.dry_run != 'true' }}
         env:
-          GPG_PASSPHRASE: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
+          PW1: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
+          PW2: ${{ secrets.GPG_PASSPHRASE }}
         run: |
+          GPG_PW="${PW1:-$PW2}"
           WAIT="validated"
           if [ "${{ steps.flags.outputs.auto }}" = "true" ]; then
             WAIT="published"
           fi
           mvn -B clean deploy -Pcentral-publish \
-            -Dgpg.passphrase="${GPG_PASSPHRASE}" \
+            -Dgpg.passphrase="${GPG_PW}" \
             -Dcentral.autoPublish="${{ steps.flags.outputs.auto }}" \
             -Dcentral.waitUntil="${WAIT}"
