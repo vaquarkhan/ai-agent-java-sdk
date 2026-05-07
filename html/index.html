@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Agent Java SDK - Model-Driven Agents for Spring Boot</title>
+    <meta name="description" content="The Strands-style agent SDK for Java. Model-driven execution loop for Spring AI.">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/style.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'] },
+                    colors: {
+                        dark: { 900: '#0f172a', 800: '#1e293b', 700: '#334155', 600: '#475569' },
+                        brand: { 500: '#2563eb', 600: '#1d4ed8', 400: '#3b82f6' }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="font-sans">
+
+    <!-- NAV -->
+    <nav class="hero-gradient">
+        <div class="nav-container">
+            <a href="#" class="nav-logo">
+                AI Agent Java SDK
+                <span class="badge">v0.1.0</span>
+            </a>
+            <div class="nav-links">
+                <a href="#">Home</a>
+                <a href="https://github.com/vaquarkhan/ai-agent-java-sdk/blob/main/ai-agent-java-sdk-core/docs/tutorial.md">Tutorial</a>
+                <a href="https://github.com/vaquarkhan/ai-agent-java-sdk/tree/main/examples">Examples</a>
+                <a href="https://github.com/vaquarkhan/ai-agent-java-sdk">GitHub</a>
+                <a href="#get-started" class="btn-nav">Maven Central</a>
+            </div>
+        </div>
+
+        <!-- HERO -->
+        <div class="max-w-5xl mx-auto px-6 pt-16 pb-20 text-center relative z-10">
+            <div class="mb-6">
+                <span class="badge-accent badge">v0.1.0-SNAPSHOT - Spring Boot 3.5.9 + Spring AI 1.1.2</span>
+            </div>
+            <h1 class="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight mb-6 text-white">
+                The Strands-style agent SDK for Java
+            </h1>
+            <p class="text-lg md:text-xl text-slate-400 max-w-3xl mx-auto mb-8 leading-relaxed">
+                Model-driven execution loop for Spring AI. The foundation model plans, selects tools, and iterates until done. Same pattern as Python Strands, native to Spring Boot.
+            </p>
+            <div class="flex flex-wrap justify-center gap-4 mb-10">
+                <a href="https://github.com/vaquarkhan/ai-agent-java-sdk/blob/main/ai-agent-java-sdk-core/docs/tutorial.md" class="btn-primary">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+                    See the tutorial
+                </a>
+                <a href="https://github.com/vaquarkhan/ai-agent-java-sdk" class="btn-secondary">
+                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                    Star on GitHub
+                </a>
+            </div>
+            <div class="stats-row justify-center mb-12">
+                <div class="stat-item">
+                    <span class="stat-dot"></span>
+                    198 tests passing
+                </div>
+                <div class="stat-item">
+                    <span class="stat-dot" style="background: #3b82f6;"></span>
+                    Apache 2.0
+                </div>
+                <div class="stat-item">
+                    <span class="stat-dot" style="background: #8b5cf6;"></span>
+                    Spring AI native
+                </div>
+            </div>
+            <div class="max-w-2xl mx-auto">
+                <img src="https://raw.githubusercontent.com/vaquarkhan/ai-agent-java-sdk/main/images/java-ai-agent-sdk.png" alt="AI Agent Java SDK" class="rounded-xl shadow-2xl border border-slate-700/50 w-full">
+            </div>
+        </div>
+    </nav>
+
+    <!-- WHY THIS EXISTS -->
+    <section class="py-20 px-6">
+        <div class="max-w-6xl mx-auto">
+            <div class="text-center mb-12">
+                <h2 class="section-title">Enterprise Java needs model-driven agents</h2>
+                <p class="section-subtitle mx-auto">
+                    Python Strands SDK works great for Python teams. But Spring Boot backends need the same execution model without maintaining a separate Python service.
+                </p>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="metric-card">
+                    <div class="metric-value">1</div>
+                    <div class="metric-label">Execution loop</div>
+                    <div class="metric-desc">Model decides tool use, not hardcoded DAGs</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">45+</div>
+                    <div class="metric-label">Source files</div>
+                    <div class="metric-desc">Complete SDK with security, observability, plugins</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">198</div>
+                    <div class="metric-label">Tests passing</div>
+                    <div class="metric-desc">Unit + property-based + integration + security</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">21</div>
+                    <div class="metric-label">Tutorial parts</div>
+                    <div class="metric-desc">From quickstart to production hardening</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CORE FEATURES -->
+    <section class="py-20 px-6 bg-slate-900/50">
+        <div class="max-w-6xl mx-auto">
+            <div class="text-center mb-12">
+                <h2 class="section-title">Everything you need for model-driven agents</h2>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+                <div class="feature-card">
+                    <div class="feature-icon">L</div>
+                    <h3>Model-Driven Loop</h3>
+                    <p>StrandsExecutionLoop iterates model-tool-model until done</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">T</div>
+                    <h3>Tool Bridge</h3>
+                    <p>Auto-discovers ToolCallbackProvider beans (browser, code interpreter, MCP, custom)</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">P</div>
+                    <h3>Parallel Tools</h3>
+                    <p>Execute multiple tool calls concurrently via CompletableFuture</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">H</div>
+                    <h3>Hook System</h3>
+                    <p>6 event types: before/after invocation, model call, tool call</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">X</div>
+                    <h3>Plugin System</h3>
+                    <p>Composable extensions with auto-discovery of hooks and tools</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">S</div>
+                    <h3>Skills</h3>
+                    <p>Reusable prompt + tool combinations as portable units</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">R</div>
+                    <h3>Steering Rules</h3>
+                    <p>Conditional prompt injection based on keyword matching</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">D</div>
+                    <h3>Session Persistence</h3>
+                    <p>InMemory, File, or custom backends for multi-turn conversations</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">C</div>
+                    <h3>Conversation Management</h3>
+                    <p>Sliding window and token-count strategies</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">O</div>
+                    <h3>Observability</h3>
+                    <p>Micrometer metrics, tracing spans, reasoning traces</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">K</div>
+                    <h3>Security Hardening</h3>
+                    <p>Argument limits, timeouts, rate limiting, sanitization</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">F</div>
+                    <h3>Streaming SSE</h3>
+                    <p>Flux&lt;String&gt; with pause/resume around tool boundaries</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CODE EXAMPLE -->
+    <section class="py-20 px-6">
+        <div class="max-w-6xl mx-auto">
+            <div class="text-center mb-12">
+                <h2 class="section-title">Works like Python Strands, runs on Spring Boot</h2>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+                <div>
+                    <h3 class="text-xl font-bold text-white mb-4">Minimal setup, maximum autonomy</h3>
+                    <p class="text-slate-400 mb-4 leading-relaxed">
+                        Add the SDK dependency, configure your model provider in <code class="text-blue-400">application.yml</code>, and expose an endpoint. The agent handles the rest: planning, tool selection, iteration, and response synthesis.
+                    </p>
+                    <p class="text-slate-400 mb-4 leading-relaxed">
+                        No DAGs to define. No routing logic to maintain. The foundation model decides which tools to call and when to stop. You focus on the goal, not the graph.
+                    </p>
+                    <ul class="space-y-3 text-slate-400">
+                        <li class="flex items-start gap-2">
+                            <span class="text-green-400 mt-1">&#10003;</span>
+                            Auto-discovers all registered tool beans
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <span class="text-green-400 mt-1">&#10003;</span>
+                            Session management built in
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <span class="text-green-400 mt-1">&#10003;</span>
+                            Works with any Spring AI model starter
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <span class="text-green-400 mt-1">&#10003;</span>
+                            Production-ready security defaults
+                        </li>
+                    </ul>
+                </div>
+                <div class="code-block">
+                    <code><span class="comment">// application.yml: strands.agent.model-provider: bedrock</span>
+<span class="comment">// Just add a Spring AI model starter and configure credentials.</span>
+
+<span class="annotation">@RestController</span>
+<span class="keyword">public class</span> <span class="type">AgentController</span> {
+    <span class="keyword">private final</span> <span class="type">StrandsAgent</span> agent;
+
+    <span class="annotation">@GetMapping</span>(<span class="string">"/ask"</span>)
+    <span class="keyword">public</span> <span class="type">String</span> <span class="method">ask</span>(<span class="annotation">@RequestParam</span> <span class="type">String</span> q) {
+        <span class="keyword">return</span> agent.<span class="method">execute</span>(q,
+            <span class="type">StrandsExecutionContext</span>.<span class="method">standalone</span>(<span class="string">"session-1"</span>)
+        ).<span class="method">content</span>();
+    }
+}</code>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- PYTHON vs JAVA -->
+    <section class="py-20 px-6 bg-slate-900/50">
+        <div class="max-w-6xl mx-auto">
+            <div class="text-center mb-12">
+                <h2 class="section-title">Same pattern, different runtime</h2>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>Concern</th>
+                            <th>Python Strands</th>
+                            <th>AI Agent Java SDK</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="font-medium text-white">Agent creation</td>
+                            <td><code class="text-blue-300">agent = Agent(tools=[...])</code></td>
+                            <td><code class="text-blue-300">@Bean StrandsAgent(...)</code></td>
+                        </tr>
+                        <tr>
+                            <td class="font-medium text-white">Tool registration</td>
+                            <td><code class="text-blue-300">@tool decorator</code></td>
+                            <td><code class="text-blue-300">ToolCallbackProvider beans</code></td>
+                        </tr>
+                        <tr>
+                            <td class="font-medium text-white">System prompt</td>
+                            <td><code class="text-blue-300">agent(system_prompt=...)</code></td>
+                            <td><code class="text-blue-300">strands.agent.system-prompt in YAML</code></td>
+                        </tr>
+                        <tr>
+                            <td class="font-medium text-white">Streaming</td>
+                            <td><code class="text-blue-300">async for event in agent.stream()</code></td>
+                            <td><code class="text-blue-300">Flux&lt;String&gt; via SSE endpoint</code></td>
+                        </tr>
+                        <tr>
+                            <td class="font-medium text-white">MCP tools</td>
+                            <td><code class="text-blue-300">MCPClient("server")</code></td>
+                            <td><code class="text-blue-300">spring.ai.mcp.client config</code></td>
+                        </tr>
+                        <tr>
+                            <td class="font-medium text-white">Observability</td>
+                            <td><code class="text-blue-300">OpenTelemetry SDK</code></td>
+                            <td><code class="text-blue-300">Micrometer + Spring Actuator</code></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- COMPOSITION -->
+    <section class="py-20 px-6">
+        <div class="max-w-6xl mx-auto">
+            <div class="text-center mb-12">
+                <h2 class="section-title">Fits into the Spring AI ecosystem</h2>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="composition-card">
+                    <div class="mb-3">
+                        <span class="badge-success badge">spring-ai-agentcore</span>
+                    </div>
+                    <h3>Amazon Bedrock AgentCore</h3>
+                    <p>Natively imports the spring-ai-agentcore BOM for serverless runtimes, code interpreters, and browser automation tools managed by AWS.</p>
+                </div>
+                <div class="composition-card">
+                    <div class="mb-3">
+                        <span class="badge">spring-ai-a2a</span>
+                    </div>
+                    <h3>Agent-to-Agent Protocol</h3>
+                    <p>Expose your agent as an A2A-compatible service. Other agents discover and invoke it via the standard Agent-to-Agent protocol.</p>
+                </div>
+                <div class="composition-card">
+                    <div class="mb-3">
+                        <span class="badge-accent badge">spring-ai-mcp</span>
+                    </div>
+                    <h3>Model Context Protocol</h3>
+                    <p>Connect to any MCP server. The SDK auto-discovers MCP tool providers and registers them in the execution loop alongside native tools.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- GET STARTED -->
+    <section id="get-started" class="py-20 px-6 bg-slate-900/50">
+        <div class="max-w-4xl mx-auto">
+            <div class="text-center mb-12">
+                <h2 class="section-title">Get started in minutes</h2>
+            </div>
+            <div class="space-y-8">
+                <div>
+                    <h3 class="text-lg font-bold text-white mb-3">1. Add the Maven dependency</h3>
+                    <div class="code-block">
+                        <code><span class="comment">&lt;!-- pom.xml --&gt;</span>
+<span class="keyword">&lt;dependency&gt;</span>
+    <span class="keyword">&lt;groupId&gt;</span><span class="string">io.github.vaquarkhan</span><span class="keyword">&lt;/groupId&gt;</span>
+    <span class="keyword">&lt;artifactId&gt;</span><span class="string">ai-agent-java-sdk-core</span><span class="keyword">&lt;/artifactId&gt;</span>
+    <span class="keyword">&lt;version&gt;</span><span class="string">0.1.0-SNAPSHOT</span><span class="keyword">&lt;/version&gt;</span>
+<span class="keyword">&lt;/dependency&gt;</span></code>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold text-white mb-3">2. Configure application.yml</h3>
+                    <div class="code-block">
+                        <code><span class="comment"># application.yml</span>
+<span class="keyword">strands</span>:
+  <span class="keyword">agent</span>:
+    <span class="keyword">model-provider</span>: <span class="string">bedrock</span>
+    <span class="keyword">system-prompt</span>: <span class="string">"You are a helpful assistant."</span>
+    <span class="keyword">max-iterations</span>: <span class="string">10</span>
+
+<span class="keyword">spring</span>:
+  <span class="keyword">ai</span>:
+    <span class="keyword">bedrock</span>:
+      <span class="keyword">aws</span>:
+        <span class="keyword">region</span>: <span class="string">us-east-1</span></code>
+                    </div>
+                </div>
+                <div class="text-center pt-4">
+                    <a href="https://github.com/vaquarkhan/ai-agent-java-sdk/blob/main/ai-agent-java-sdk-core/docs/tutorial.md" class="btn-primary">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+                        Read the full tutorial
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+        <div class="max-w-6xl mx-auto">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+                <div>
+                    <h4 class="text-white font-bold mb-3">AI Agent Java SDK</h4>
+                    <p class="text-slate-400 text-sm">Model-driven execution loop for Spring AI. Built by Vaquar Khan.</p>
+                </div>
+                <div>
+                    <h4 class="text-white font-bold mb-3">Resources</h4>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="https://github.com/vaquarkhan/ai-agent-java-sdk">GitHub Repository</a></li>
+                        <li><a href="https://github.com/vaquarkhan/ai-agent-java-sdk/blob/main/ai-agent-java-sdk-core/docs/tutorial.md">Tutorial</a></li>
+                        <li><a href="https://github.com/vaquarkhan/ai-agent-java-sdk/blob/main/ai-agent-java-sdk-core/docs/developer-guide.md">Developer Guide</a></li>
+                        <li><a href="https://docs.spring.io/spring-ai/reference/">Spring AI Docs</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-white font-bold mb-3">Author</h4>
+                    <p class="text-slate-400 text-sm mb-2">Vaquar Khan</p>
+                    <a href="https://github.com/vaquarkhan" class="text-sm text-slate-400 hover:text-blue-400">github.com/vaquarkhan</a>
+                </div>
+            </div>
+            <div class="border-t border-slate-700 pt-6 flex flex-col md:flex-row justify-between items-center gap-4">
+                <p class="text-slate-500 text-sm">Apache License 2.0</p>
+                <p class="text-slate-500 text-sm">AI Agent Java SDK v0.1.0</p>
+            </div>
+        </div>
+    </footer>
+
+</body>
+</html>
