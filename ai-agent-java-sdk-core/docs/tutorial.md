@@ -43,6 +43,13 @@ For architecture details and property reference, see [developer-guide.md](develo
 - Maven or Gradle build tool
 - AWS credentials configured if using Amazon Bedrock (environment variables, `~/.aws/credentials`, or IAM roles)
 
+### Building this repository (SDK vs examples)
+
+If you are working from a **clone of the monorepo** (not only consuming the JAR from Maven Central):
+
+- From the **repository root**, `mvn clean install` builds and installs **`ai-agent-java-sdk-core`** and **`ai-agent-java-sdk-dynamodb-session-manager`** only. The root reactor does **not** include the `examples/` tree.
+- **Runnable samples** live under `examples/`. After a root `mvn install`, either build them all with `mvn -f examples/pom.xml package` or `cd` into one sample (for example `examples/quickstart-agent`) and run `mvn spring-boot:run`. See the top-level [examples/README.md](../../examples/README.md).
+
 ---
 
 ## Part 1: Getting Started
@@ -53,7 +60,7 @@ Add the SDK to your `pom.xml`:
 
 ```xml
 <dependency>
-    <groupId>com.example.spring.ai</groupId>
+    <groupId>io.github.vaquarkhan</groupId>
     <artifactId>ai-agent-java-sdk-core</artifactId>
     <version>0.1.0-SNAPSHOT</version>
 </dependency>
@@ -93,9 +100,9 @@ ai:
 Auto-configuration registers a `AiAgent` bean when `ai.agent.enabled` is true (the default). You can inject it directly:
 
 ```java
-import com.example.spring.ai.agent.AiAgent;
-import com.example.spring.ai.agent.execution.AgentExecutionContext;
-import com.example.spring.ai.agent.model.AgentResponse;
+import io.github.vaquarkhan.strands.AiAgent;
+import io.github.vaquarkhan.strands.execution.AgentExecutionContext;
+import io.github.vaquarkhan.strands.model.AgentResponse;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -135,10 +142,10 @@ print(result)
 Auto-configuration registers a `NoopLoopModelClient` if you do not define your own bean. That is only useful for tests. For production, declare a `@Bean` of type `LoopModelClient` that delegates to Spring AI's `ChatClient`:
 
 ```java
-import com.example.spring.ai.agent.execution.ExecutionMessage;
-import com.example.spring.ai.agent.execution.LoopModelClient;
-import com.example.spring.ai.agent.execution.ModelTurnResponse;
-import com.example.spring.ai.agent.execution.stream.StreamEvent;
+import io.github.vaquarkhan.strands.execution.ExecutionMessage;
+import io.github.vaquarkhan.strands.execution.LoopModelClient;
+import io.github.vaquarkhan.strands.execution.ModelTurnResponse;
+import io.github.vaquarkhan.strands.execution.stream.StreamEvent;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.context.annotation.Bean;
@@ -706,8 +713,8 @@ ai:
 The `DynamicMcpToolConnector` lets you connect to MCP servers at runtime, not just at startup. This mirrors the Python Strands dynamic MCP client capability.
 
 ```java
-import com.example.spring.ai.agent.tool.DynamicMcpToolConnector;
-import com.example.spring.ai.agent.tool.DynamicMcpToolConnector.McpConnectionConfig;
+import io.github.vaquarkhan.strands.tool.DynamicMcpToolConnector;
+import io.github.vaquarkhan.strands.tool.DynamicMcpToolConnector.McpConnectionConfig;
 
 // Inject the connector
 DynamicMcpToolConnector connector;
@@ -793,7 +800,7 @@ Another example:
 ### 8.3 Using DirectoryToolLoader
 
 ```java
-import com.example.spring.ai.agent.tool.DirectoryToolLoader;
+import io.github.vaquarkhan.strands.tool.DirectoryToolLoader;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.nio.file.Path;
 
@@ -921,8 +928,8 @@ Hook exceptions are logged as warnings and do not interrupt the execution loop.
 Use `HookRegistry` to register hooks by event type:
 
 ```java
-import com.example.spring.ai.agent.hook.HookRegistry;
-import com.example.spring.ai.agent.hook.AgentHookEvent;
+import io.github.vaquarkhan.strands.hook.HookRegistry;
+import io.github.vaquarkhan.strands.hook.AgentHookEvent;
 
 @Configuration
 public class HookConfig {
@@ -979,8 +986,8 @@ public AiAgent aiAgent(AgentExecutionLoop loop,
 For a cleaner approach, annotate methods with `@OnHook`:
 
 ```java
-import com.example.spring.ai.agent.hook.OnHook;
-import com.example.spring.ai.agent.hook.AgentHookEvent;
+import io.github.vaquarkhan.strands.hook.OnHook;
+import io.github.vaquarkhan.strands.hook.AgentHookEvent;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -1016,8 +1023,8 @@ System.out.println("Registered " + registered + " hooks");
 ### 10.6 Complete Example: Tool Call Tracking Hook
 
 ```java
-import com.example.spring.ai.agent.hook.OnHook;
-import com.example.spring.ai.agent.hook.AgentHookEvent;
+import io.github.vaquarkhan.strands.hook.OnHook;
+import io.github.vaquarkhan.strands.hook.AgentHookEvent;
 import org.springframework.stereotype.Component;
 
 import java.util.concurrent.ConcurrentHashMap;
@@ -1082,9 +1089,9 @@ public interface AgentPlugin {
 ### 11.3 Creating a Plugin
 
 ```java
-import com.example.spring.ai.agent.AiAgent;
-import com.example.spring.ai.agent.hook.AgentHookEvent;
-import com.example.spring.ai.agent.plugin.AgentPlugin;
+import io.github.vaquarkhan.strands.AiAgent;
+import io.github.vaquarkhan.strands.hook.AgentHookEvent;
+import io.github.vaquarkhan.strands.plugin.AgentPlugin;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -1124,7 +1131,7 @@ The `PluginScanner` scans a plugin for two things:
 2. Methods returning `ToolCallbackProvider` - discovered as tool sources
 
 ```java
-import com.example.spring.ai.agent.plugin.PluginScanner;
+import io.github.vaquarkhan.strands.plugin.PluginScanner;
 
 PluginScanner scanner = new PluginScanner(hookRegistry);
 PluginScanner.ScanResult result = scanner.scan(myPlugin);
@@ -1254,8 +1261,8 @@ Skill codeReviewSkill = new Skill(
 The `SkillsPlugin` loads skills and creates an `Advisor` that prepends skill prompt fragments as system messages:
 
 ```java
-import com.example.spring.ai.agent.plugin.Skill;
-import com.example.spring.ai.agent.plugin.SkillsPlugin;
+import io.github.vaquarkhan.strands.plugin.Skill;
+import io.github.vaquarkhan.strands.plugin.SkillsPlugin;
 
 @Configuration
 public class SkillConfig {
@@ -1311,8 +1318,8 @@ public record SteeringRule(
 The `SteeringAdvisor` implements the `Advisor` interface. It evaluates each rule's condition against the last user message. Matching is case-insensitive keyword containment: if the user prompt contains the rule's condition string (ignoring case), the rule's instruction is prepended as a system message.
 
 ```java
-import com.example.spring.ai.agent.steering.SteeringAdvisor;
-import com.example.spring.ai.agent.steering.SteeringRule;
+import io.github.vaquarkhan.strands.steering.SteeringAdvisor;
+import io.github.vaquarkhan.strands.steering.SteeringRule;
 
 @Configuration
 public class SteeringConfig {
@@ -1380,7 +1387,7 @@ LLMs have finite context windows. As conversations grow longer, you need a strat
 Keeps only the last N messages. Simple and predictable.
 
 ```java
-import com.example.spring.ai.agent.conversation.SlidingWindowConversationManager;
+import io.github.vaquarkhan.strands.conversation.SlidingWindowConversationManager;
 
 @Bean
 public SlidingWindowConversationManager conversationManager() {
@@ -1395,7 +1402,7 @@ Default window size is 20 if you use the no-arg constructor. When the message li
 Estimates token count per message and removes oldest messages until the total fits within a configured token budget. Uses a simple heuristic: characters / 4 (a reasonable approximation for English text with most LLM tokenizers).
 
 ```java
-import com.example.spring.ai.agent.conversation.TokenCountConversationManager;
+import io.github.vaquarkhan.strands.conversation.TokenCountConversationManager;
 
 @Bean
 public TokenCountConversationManager conversationManager() {
@@ -1457,7 +1464,7 @@ public interface SessionManager {
 Backed by a `ConcurrentHashMap`. Fast, but data is lost when the application restarts.
 
 ```java
-import com.example.spring.ai.agent.session.InMemorySessionManager;
+import io.github.vaquarkhan.strands.session.InMemorySessionManager;
 
 @Bean
 public SessionManager sessionManager() {
@@ -1470,7 +1477,7 @@ public SessionManager sessionManager() {
 Persists each session as a JSON file in a directory. Uses file locking for thread safety.
 
 ```java
-import com.example.spring.ai.agent.session.FileSessionManager;
+import io.github.vaquarkhan.strands.session.FileSessionManager;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.nio.file.Path;
 
@@ -1646,7 +1653,7 @@ Enable debug logging in `application.yml`:
 ```yaml
 logging:
   level:
-    com.example.spring.ai.agent: DEBUG
+    io.github.vaquarkhan.strands: DEBUG
 ```
 
 ### 16.5 Output Sanitization
@@ -1868,7 +1875,7 @@ ai:
 
 logging:
   level:
-    com.example.spring.ai.agent: INFO
+    io.github.vaquarkhan.strands: INFO
 ```
 
 ---
@@ -2025,10 +2032,10 @@ User prompt -> Steering -> Skills -> Memory -> Execution Loop
 ```yaml
 logging:
   level:
-    com.example.spring.ai.agent: DEBUG
-    com.example.spring.ai.agent.tool: DEBUG
-    com.example.spring.ai.agent.hook: DEBUG
-    com.example.spring.ai.agent.plugin: DEBUG
+    io.github.vaquarkhan.strands: DEBUG
+    io.github.vaquarkhan.strands.tool: DEBUG
+    io.github.vaquarkhan.strands.hook: DEBUG
+    io.github.vaquarkhan.strands.plugin: DEBUG
 ```
 
 ### 20.3 Inspecting the Reasoning Trace
@@ -2324,13 +2331,13 @@ System.out.println("Iterations: " + trace.iterations().size());
 | `callback_handler` | `@OnHook` annotations / `HookRegistry` |
 | `Plugin` base class | `AgentPlugin` interface |
 | `AgentResult.metrics` | `AgentResponse.reasoningTrace()` |
-| `logging.getLogger("strands")` | SLF4J + `logging.level.com.example.spring.ai.agent: DEBUG` |
+| `logging.getLogger("strands")` | SLF4J + `logging.level.io.github.vaquarkhan.strands: DEBUG` |
 
 ---
 
 ## Next Steps
 
-- Run the examples under [examples/README.md](../examples/README.md): **quickstart-agent**, **calculator-minimal-agent**, **streaming-sse-agent**, **tool-discovery-filter-agent**
+- Run the samples listed in [examples/README.md](../../examples/README.md) (**quickstart-agent**, **calculator-minimal-agent**, **streaming-sse-agent**, **tool-discovery-filter-agent**, and others). From the repo root: `mvn install`, then `mvn -f examples/pom.xml package` or `cd examples/<sample>` and `mvn spring-boot:run`.
 - Read [developer-guide.md](developer-guide.md) for the full configuration matrix and observability reference
 - Implement a real `LoopModelClient` for your Spring AI chat model (Bedrock, OpenAI, Ollama, etc.)
 - Set up Micrometer dashboards to monitor `ai.agent.iteration.count`, `ai.agent.loop.duration`, and `ai.agent.tool.invocations`

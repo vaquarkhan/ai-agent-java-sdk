@@ -73,10 +73,20 @@ Use **Spring AI** as your foundational layer to easily connect your enterprise d
 Add the **`ai-agent-java-sdk`** toolkit when you need to deploy autonomous, model-driven agents into mission-critical environments where strict token budgeting, PII redaction, automated dependency validation, and dynamic, on-the-fly task planning are absolute requirements.
 
 
-## Build
+## Build (SDK)
 
 ```bash
 mvn clean install
+```
+
+## Build (examples, optional)
+
+Install the SDK first, then either build all examples or one module:
+
+```bash
+mvn clean install
+mvn -f examples/pom.xml -DskipTests package
+# or: cd examples/quickstart-agent && mvn package
 ```
 
 ## Layout

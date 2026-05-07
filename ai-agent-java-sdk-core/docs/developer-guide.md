@@ -13,6 +13,7 @@ This document is the **technical reference** for **ai-agent-java-sdk-core**: arc
 | [README.md](../README.md) | Why this module exists, benefits, quick Maven/YAML |
 | [python-strands-vs-ai-agent-java.md](python-strands-vs-ai-agent-java.md) | AWS Strands (Python) vs AI Agent Java SDK: side-by-side table |
 | [tutorial.md](tutorial.md) | Hands-on path: config, tools, MCP, streaming, hardening |
+| [examples/README.md](../../examples/README.md) | Runnable Spring Boot samples in the monorepo (build SDK from the repo root first) |
 | This file | Internals-oriented reference for contributors and integrators |
 
 ---
@@ -106,7 +107,7 @@ Validation is enforced by **`AiAgentProperties`** (Jakarta Validation) and **`Ai
 
 ## Auto-configuration
 
-**`AiAgentAutoConfiguration`** (package `com.example.spring.ai.agent.config`) registers:
+**`AiAgentAutoConfiguration`** (package `io.github.vaquarkhan.strands.config`) registers:
 
 - **`ToolRegistry`** via **`ToolBridge.discoverTools`**
 - **`LoopModelClient`** defaulting to **`NoopLoopModelClient`** (`@ConditionalOnMissingBean`)

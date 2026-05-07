@@ -83,7 +83,7 @@ The library is fully implemented and tested. It includes:
 - `AiAgentAutoConfiguration` with `@ConditionalOnProperty` and `@ConditionalOnMissingBean`
 
 **Testing:**
-- 191 tests (unit, property-based with jqwik, integration, security)
+- 200+ tests in the core module (unit, property-based with jqwik, integration, security); run `mvn verify` from the repository root to execute them
 - Property-based tests for configuration round-trip, execution loop correctness, tool discovery, streaming behavior
 - Security tests for session isolation, prompt injection, header leakage, SSRF prevention
 
